@@ -14,10 +14,10 @@
 //! Results stdout, diagnostics stderr (ADR-367).
 
 const std = @import("std");
-const corpus_mod = @import("../../corpus/tree/corpus.zig");
-const cli_args = @import("../../runtime/cold/argv/args.zig");
-const family_mod = @import("../../search/compose/family.zig");
-const regions = @import("../../search/compose/regions.zig");
+const corpus_mod = @import("../../../corpus/tree/corpus.zig");
+const cli_args = @import("../../exec/cold/argv/args.zig");
+const family_mod = @import("../../../kernel/compose/family.zig");
+const regions = @import("../../../kernel/compose/regions.zig");
 const kinship = @import("../relate/kinship.zig");
 const shared = @import("shared.zig");
 
