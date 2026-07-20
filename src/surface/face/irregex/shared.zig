@@ -51,7 +51,7 @@ pub fn commonArg(
     } else if (std.mem.eql(u8, arg, "-i") or std.mem.eql(u8, arg, "--ignore-case")) {
         c.ignore_case = true;
     } else if (std.mem.eql(u8, arg, "--top")) {
-        c.top = std.fmt.parseInt(usize, flags.need(argv, i, "--top needs a number\n"), 10) catch die("--top: bad number: {s}\n", .{argv[i.*]});
+        c.top = flags.count(argv, i, "--top");
     } else if (std.mem.eql(u8, arg, "--json")) {
         c.json = true;
     } else if (std.mem.eql(u8, arg, "--all")) {

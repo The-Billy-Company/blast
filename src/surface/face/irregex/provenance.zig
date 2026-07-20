@@ -48,9 +48,9 @@ pub fn runProvenance(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
         if (std.mem.eql(u8, arg, "--min-phrase")) {
-            min_phrase = std.fmt.parseInt(usize, flags.need(argv, &i, "--min-phrase needs a number\n"), 10) catch die("--min-phrase: bad number: {s}\n", .{argv[i]});
+            min_phrase = flags.count(argv, &i, "--min-phrase");
         } else if (std.mem.eql(u8, arg, "-C") or std.mem.eql(u8, arg, "--context")) {
-            context_lines = std.fmt.parseInt(usize, flags.need(argv, &i, "-C needs a number\n"), 10) catch die("-C: bad number: {s}\n", .{argv[i]});
+            context_lines = flags.count(argv, &i, "-C");
         } else if (std.mem.eql(u8, arg, "--json")) {
             json = true;
         } else if (std.mem.startsWith(u8, arg, "-") and arg.len > 1 and text != null) {

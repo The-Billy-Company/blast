@@ -78,7 +78,7 @@ the hand-join loses:
   each carries the closest structural neighbor and both independent distances,
   so a reviewer can see why similar names do not imply the same implementation.
 - The **scores stay separate.** Each `context` pick carries the patterns that
-  admitted it *and* its marginal bits; there is no fused, uncalibrated
+  admitted it _and_ its marginal bits; there is no fused, uncalibrated
   relevance number. `provenance` never reports a line the current bytes can't
   confirm.
 
