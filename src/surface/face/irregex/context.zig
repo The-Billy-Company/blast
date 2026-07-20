@@ -24,7 +24,8 @@ const cli_args = @import("../../exec/cold/argv/args.zig");
 const candidates = @import("../../../kernel/compose/candidates.zig");
 const context = @import("../../../kernel/compose/context.zig");
 const patterns_mod = @import("../../../kernel/batch/patterns.zig");
-const kinship = @import("../relate/kinship.zig");
+const flags = @import("../../cli/flags.zig");
+const emit = @import("../../cli/emit.zig");
 const shared = @import("shared.zig");
 
 const die = cli_args.die;
@@ -46,9 +47,9 @@ pub fn runContext(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) 
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
         if (std.mem.eql(u8, arg, "-e") or std.mem.eql(u8, arg, "--regexp")) {
-            try pats.append(gpa, kinship.need(argv, &i, "-e needs a pattern\n"));
+            try pats.append(gpa, flags.need(argv, &i, "-e needs a pattern\n"));
         } else if (std.mem.eql(u8, arg, "--match")) {
-            match = std.meta.stringToEnum(candidates.Match, kinship.need(argv, &i, "--match needs any|all\n")) orelse die("--match: any or all, not {s}\n", .{argv[i]});
+            match = std.meta.stringToEnum(candidates.Match, flags.need(argv, &i, "--match needs any|all\n")) orelse die("--match: any or all, not {s}\n", .{argv[i]});
         } else shared.commonArg(gpa, argv, &i, &c, &roots, "context");
     }
 
@@ -61,7 +62,7 @@ pub fn runContext(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) 
     defer set.deinit(gpa);
 
     const t0 = nowNs(io);
-    const rr = try kinship.rootsOf(gpa, roots.items);
+    const rr = try flags.rootsOf(gpa, roots.items);
     defer rr.deinit(gpa);
     var corpus = try corpus_mod.load(gpa, io, rr.items);
     defer corpus.deinit();
@@ -87,7 +88,7 @@ pub fn runContext(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) 
         defer labels.deinit();
         if (c.json) {
             out.print(gpa, "{{\"rank\":{d},\"path\":", .{rank}) catch oom();
-            kinship.jsonStr(&out, gpa, corpus.paths[p.doc]);
+            emit.jsonStr(&out, gpa, corpus.paths[p.doc]);
             out.print(gpa, ",\"marginal_bits\":{d:.1},\"coverage\":{d:.4},\"patterns\":", .{ p.marginal_bits, p.coverage }) catch oom();
             shared.jsonStrArray(&out, gpa, labels.items);
             out.appendSlice(gpa, "}\n") catch oom();

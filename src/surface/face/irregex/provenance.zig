@@ -23,7 +23,8 @@ const codex_face = @import("../gist/lifecycle/codex.zig");
 const cli_args = @import("../../exec/cold/argv/args.zig");
 const cento = @import("../../../corpus/index/codex/cento.zig");
 const provenance = @import("../../../kernel/compose/provenance.zig");
-const kinship = @import("../relate/kinship.zig");
+const flags = @import("../../cli/flags.zig");
+const emit_mod = @import("../../cli/emit.zig");
 
 const die = cli_args.die;
 const oom = cli_args.oom;
@@ -47,9 +48,9 @@ pub fn runProvenance(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
         if (std.mem.eql(u8, arg, "--min-phrase")) {
-            min_phrase = std.fmt.parseInt(usize, kinship.need(argv, &i, "--min-phrase needs a number\n"), 10) catch die("--min-phrase: bad number: {s}\n", .{argv[i]});
+            min_phrase = std.fmt.parseInt(usize, flags.need(argv, &i, "--min-phrase needs a number\n"), 10) catch die("--min-phrase: bad number: {s}\n", .{argv[i]});
         } else if (std.mem.eql(u8, arg, "-C") or std.mem.eql(u8, arg, "--context")) {
-            context_lines = std.fmt.parseInt(usize, kinship.need(argv, &i, "-C needs a number\n"), 10) catch die("-C: bad number: {s}\n", .{argv[i]});
+            context_lines = std.fmt.parseInt(usize, flags.need(argv, &i, "-C needs a number\n"), 10) catch die("-C: bad number: {s}\n", .{argv[i]});
         } else if (std.mem.eql(u8, arg, "--json")) {
             json = true;
         } else if (std.mem.startsWith(u8, arg, "-") and arg.len > 1 and text != null) {
@@ -125,9 +126,9 @@ fn emit(out: *std.ArrayList(u8), gpa: std.mem.Allocator, json: bool, phrase: []c
     if (json) {
         out.append(gpa, '{') catch oom();
         out.appendSlice(gpa, "\"text\":") catch oom();
-        kinship.jsonStr(out, gpa, phrase);
+        emit_mod.jsonStr(out, gpa, phrase);
         out.print(gpa, ",\"occurrences\":{d},\"source\":", .{occurrences}) catch oom();
-        if (path) |p| kinship.jsonStr(out, gpa, p) else out.appendSlice(gpa, "null") catch oom();
+        if (path) |p| emit_mod.jsonStr(out, gpa, p) else out.appendSlice(gpa, "null") catch oom();
         if (hit) |h| {
             out.print(gpa, ",\"verified\":true,\"line\":{d}", .{h.loc.line}) catch oom();
         } else {
@@ -142,7 +143,7 @@ fn emit(out: *std.ArrayList(u8), gpa: std.mem.Allocator, json: bool, phrase: []c
         while (lines.next()) |ln| out.print(gpa, "    {s}\n", .{ln}) catch oom();
     } else {
         out.print(gpa, "(drift) {s}  ", .{path orelse "(not in corpus)"}) catch oom();
-        kinship.jsonStr(out, gpa, phrase);
+        emit_mod.jsonStr(out, gpa, phrase);
         out.append(gpa, '\n') catch oom();
     }
 }

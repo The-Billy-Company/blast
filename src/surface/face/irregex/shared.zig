@@ -10,7 +10,8 @@ const std = @import("std");
 const patterns_mod = @import("../../../kernel/batch/patterns.zig");
 const cli_args = @import("../../exec/cold/argv/args.zig");
 const scope = @import("../../../corpus/scope/glob.zig");
-const kinship = @import("../relate/kinship.zig");
+const flags = @import("../../cli/flags.zig");
+const emit = @import("../../cli/emit.zig");
 
 const die = cli_args.die;
 const oom = cli_args.oom;
@@ -20,7 +21,7 @@ const oom = cli_args.oom;
 /// (drop the mandatory-scope guard and sweep the whole corpus) — plus the
 /// first bare arg as the verb's positional and every later one as a root.
 /// Each verb seeds `top`, matches its OWN flags first, then routes the rest
-/// through `commonArg`. This is the `kinship.parseOpts` shape for the compose
+/// through `commonArg`. This mirrors relate's `parseOpts` shape for the compose
 /// face: the shared arms live once so the two drivers can't drift.
 pub const Common = struct {
     fixed: bool = false,
@@ -50,7 +51,7 @@ pub fn commonArg(
     } else if (std.mem.eql(u8, arg, "-i") or std.mem.eql(u8, arg, "--ignore-case")) {
         c.ignore_case = true;
     } else if (std.mem.eql(u8, arg, "--top")) {
-        c.top = std.fmt.parseInt(usize, kinship.need(argv, i, "--top needs a number\n"), 10) catch die("--top: bad number: {s}\n", .{argv[i.*]});
+        c.top = std.fmt.parseInt(usize, flags.need(argv, i, "--top needs a number\n"), 10) catch die("--top: bad number: {s}\n", .{argv[i.*]});
     } else if (std.mem.eql(u8, arg, "--json")) {
         c.json = true;
     } else if (std.mem.eql(u8, arg, "--all")) {
@@ -119,12 +120,12 @@ pub fn matchedLabels(gpa: std.mem.Allocator, pats: []const []const u8, mask: u64
 }
 
 /// A JSON array of escaped strings — `["a","b"]` — for the composed verbs'
-/// `--json` pattern lists. Reuses `kinship.jsonStr`'s escaper per element.
+/// `--json` pattern lists. Reuses `emit.jsonStr`'s escaper per element.
 pub fn jsonStrArray(buf: *std.ArrayList(u8), gpa: std.mem.Allocator, items: []const []const u8) void {
     buf.append(gpa, '[') catch oom();
     for (items, 0..) |s, i| {
         if (i != 0) buf.append(gpa, ',') catch oom();
-        kinship.jsonStr(buf, gpa, s);
+        emit.jsonStr(buf, gpa, s);
     }
     buf.append(gpa, ']') catch oom();
 }

@@ -18,7 +18,8 @@ const corpus_mod = @import("../../../corpus/tree/corpus.zig");
 const cli_args = @import("../../exec/cold/argv/args.zig");
 const family_mod = @import("../../../kernel/compose/family.zig");
 const regions = @import("../../../kernel/compose/regions.zig");
-const kinship = @import("../relate/kinship.zig");
+const flags = @import("../../cli/flags.zig");
+const emit = @import("../../cli/emit.zig");
 const shared = @import("shared.zig");
 
 const die = cli_args.die;
@@ -46,18 +47,18 @@ pub fn runFamily(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !
         const arg = argv[i];
         if (std.mem.eql(u8, arg, "--max-distance")) {
             if (mode_set) die("irregex family: --max-distance and --echo-min are mutually exclusive\n", .{});
-            mode = .{ .dup = kinship.unitFloat(kinship.need(argv, &i, "--max-distance needs a number in [0,1]\n"), "--max-distance") };
+            mode = .{ .dup = flags.unitFloat(flags.need(argv, &i, "--max-distance needs a number in [0,1]\n"), "--max-distance") };
             mode_set = true;
         } else if (std.mem.eql(u8, arg, "--max-structure-distance")) {
             if (mode_set) die("irregex family: similarity channel flags are mutually exclusive\n", .{});
-            mode = .{ .structure = kinship.unitFloat(kinship.need(argv, &i, "--max-structure-distance needs a number in [0,1]\n"), "--max-structure-distance") };
+            mode = .{ .structure = flags.unitFloat(flags.need(argv, &i, "--max-structure-distance needs a number in [0,1]\n"), "--max-structure-distance") };
             mode_set = true;
         } else if (std.mem.eql(u8, arg, "--echo-min") or std.mem.eql(u8, arg, "--min-echo")) {
             if (mode_set) die("irregex family: --max-distance and --echo-min are mutually exclusive\n", .{});
-            mode = .{ .echo = kinship.unitFloat(kinship.need(argv, &i, "--echo-min needs a number in [0,1]\n"), "--echo-min") };
+            mode = .{ .echo = flags.unitFloat(flags.need(argv, &i, "--echo-min needs a number in [0,1]\n"), "--echo-min") };
             mode_set = true;
         } else if (std.mem.eql(u8, arg, "--unit")) {
-            const value = kinship.need(argv, &i, "--unit needs function, match, or file\n");
+            const value = flags.need(argv, &i, "--unit needs function, match, or file\n");
             unit = if (std.mem.eql(u8, value, "function"))
                 .function
             else if (std.mem.eql(u8, value, "match"))
@@ -67,11 +68,11 @@ pub fn runFamily(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !
             else
                 die("--unit: expected function, match, or file; got {s}\n", .{value});
         } else if (std.mem.eql(u8, arg, "-C") or std.mem.eql(u8, arg, "--context")) {
-            context = kinship.count(argv, &i, "--context");
+            context = flags.count(argv, &i, "--context");
         } else if (std.mem.eql(u8, arg, "--min-size")) {
-            min_size = kinship.minSize(argv, &i);
+            min_size = flags.minSize(argv, &i);
         } else if (std.mem.eql(u8, arg, "--only")) {
-            const value = kinship.need(argv, &i, "--only needs family, distinct, or all\n");
+            const value = flags.need(argv, &i, "--only needs family, distinct, or all\n");
             only = if (std.mem.eql(u8, value, "family"))
                 .family
             else if (std.mem.eql(u8, value, "distinct"))
@@ -94,7 +95,7 @@ pub fn runFamily(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !
     defer set.deinit(gpa);
 
     const t0 = nowNs(io);
-    const rr = try kinship.rootsOf(gpa, roots.items);
+    const rr = try flags.rootsOf(gpa, roots.items);
     defer rr.deinit(gpa);
     var corpus = try corpus_mod.load(gpa, io, rr.items);
     defer corpus.deinit();
@@ -272,9 +273,9 @@ fn compactPath(path: []const u8, roots: []const []const u8) []const u8 {
 
 fn emitRegionJson(out: *std.ArrayList(u8), gpa: std.mem.Allocator, docs: []const []const u8, paths: []const []const u8, r: regions.Region, unit: regions.Unit) void {
     out.appendSlice(gpa, "{\"path\":") catch oom();
-    kinship.jsonStr(out, gpa, paths[r.doc]);
+    emit.jsonStr(out, gpa, paths[r.doc]);
     out.print(gpa, ",\"line_start\":{d},\"line_end\":{d},\"headline\":", .{ r.line_start, r.line_end }) catch oom();
-    kinship.jsonStr(out, gpa, headline(docs[r.doc], r, unit));
+    emit.jsonStr(out, gpa, headline(docs[r.doc], r, unit));
     out.append(gpa, '}') catch oom();
 }
 
