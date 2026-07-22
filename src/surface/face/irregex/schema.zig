@@ -26,11 +26,16 @@ const manifest =
     \\      "summary": "where did this text come from, and does the tree still contain it: relate's Ziv-Merhav cross-parse attributes each maximal verbatim phrase to one exemplar file on the codex shelf, then irregex re-reads that file's CURRENT bytes and re-finds the phrase exactly — a phrase is surfaced only if the live file still contains it (>=12-byte floor), never a stale line; requires `relate index --shelf` (or `gist codex build`)",
     \\      "args": [{"name": "text", "type": "string", "required": true, "description": "the pasted text to attribute"}],
     \\      "flags": [{"name": "--min-phrase", "type": "int", "default": 12, "description": "shortest matched phrase reported (bytes)"}, {"name": "-C/--context", "type": "int", "default": 2, "description": "context lines around each located phrase"}, {"name": "--json", "type": "bool", "default": false, "description": "NDJSON {text, occurrences, source, verified, line} rows"}]
+    \\    },
+    \\    "blast": {
+    \\      "summary": "the live blast radius of a symbol computed from CURRENT bytes (no precomputed graph, so a mid-edit file counts the moment it saves): the seed's definition site(s) + kind guess, direct dependents (functions referencing it, def/use classified) and dependencies (identifiers the seed's body resolves to), tangential twins (compression kin of the seed's file — co-edit risk) and ripple (second-hop callers, hops=2), and comments that MENTION it (stale-doc / TODO surface). Exact and statistical evidence stay in separate fields — never a fused score",
+    \\      "args": [{"name": "symbol", "type": "string", "required": true, "description": "the identifier (or concept token) to blast"}, {"name": "ROOT...", "type": "string[]", "required": false, "description": "corpus roots to narrow to; default is the whole CWD corpus"}],
+    \\      "flags": [{"name": "--budget", "type": "int", "default": null, "description": "soft token cap; trims the lowest-priority tail (ripple/twins/comments first) and records stats.omitted"}, {"name": "--json", "type": "bool", "default": false, "description": "one JSON report {seed, direct{dependents,dependencies}, tangential{twins,ripple}, comments, stats, notes}"}]
     \\    }
     \\  },
-    \\  "candidate_set": "exact matching first selects docs; family then lifts matching source lines into enclosing functions or bounded windows before compression, while --unit file keeps whole-doc candidates",
+    \\  "candidate_set": "exact matching first selects docs; family then lifts matching source lines into enclosing functions or bounded windows before compression, while --unit file keeps whole-doc candidates; blast selects the seed's neighborhood by word-bounded search + function-region extraction",
     \\  "scoring": "exact and compression signals stay in SEPARATE fields — no fused relevance number",
-    \\  "corpus_policy": "context/family load the INDEX corpus under the roots and REQUIRE a scope (ROOT... or --all); provenance reads the corpus-wide codex shelf",
+    \\  "corpus_policy": "context/family load the INDEX corpus under the roots and REQUIRE a scope (ROOT... or --all); provenance reads the corpus-wide codex shelf; blast scopes to the whole CWD corpus by default, narrowable with ROOT...",
     \\  "output_stream": {"results": "stdout", "diagnostics": "stderr"},
     \\  "exit_codes": {"0": "verb ran (rows may be empty)", "2": "usage, parse, pattern, or missing-shelf error"}
     \\}
@@ -41,12 +46,12 @@ pub fn emit() void {
     corpus_mod.emitStdout(manifest);
 }
 
-test "irregex --schema is valid JSON naming all three composed verbs" {
+test "irregex --schema is valid JSON naming all composed verbs" {
     const t = std.testing;
     const parsed = try std.json.parseFromSlice(std.json.Value, t.allocator, manifest, .{});
     defer parsed.deinit();
     const verbs = parsed.value.object.get("verbs").?.object;
-    for ([_][]const u8{ "context", "family", "provenance" }) |v| {
+    for ([_][]const u8{ "context", "family", "provenance", "blast" }) |v| {
         try t.expect(verbs.contains(v));
     }
     try t.expectEqualStrings("irregex", parsed.value.object.get("tool").?.string);

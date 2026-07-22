@@ -31,6 +31,7 @@ const irregex = @import("irregex");
 const context = irregex.commands.compose_context;
 const family = irregex.commands.compose_family;
 const provenance = irregex.commands.compose_provenance;
+const blast = irregex.commands.compose_blast;
 const schema = irregex.commands.compose_schema;
 
 fn usage() void {
@@ -41,6 +42,7 @@ fn usage() void {
         \\  reading set among matching files      context
         \\  similar vs distinct implementations  family
         \\  where a pasted snippet is really from  provenance
+        \\  what moves if I change this symbol    blast
         \\
         \\verbs:
         \\  irregex context TEXT -e P [-e P...] [--match any|all] [-F] [-i]
@@ -59,6 +61,11 @@ fn usage() void {
         \\      quotation attribution against the codex shelf, then current-byte
         \\      verification + context; a phrase surfaces only if the live file
         \\      still contains it (never a stale line)
+        \\  irregex blast SYMBOL [--budget N] [--json] {ROOT... | (whole corpus)}
+        \\      the live blast radius of a symbol — its definition, the functions
+        \\      that depend on it and that it depends on, its file's compression
+        \\      twins, second-hop ripple, and the comments that mention it — all
+        \\      from CURRENT bytes, so a mid-edit file counts the moment it saves
         \\
         \\niche choices:
         \\  --match any               a file matches if ANY -e pattern hits (default)
@@ -73,6 +80,8 @@ fn usage() void {
         \\  family --only MODE        emit family, distinct, or all rows (default all)
         \\  context/family scope      ROOT... or --all is REQUIRED (no silent .etc sweep)
         \\  provenance --min-phrase N raise the phrase floor to drop trivial quotes
+        \\  blast --budget N          soft token cap; trims the lowest-priority tail
+        \\  blast (scope)             ROOT... narrows; default is the whole CWD corpus
         \\  --json                    NDJSON on stdout; diagnostics stay on stderr
         \\
         \\see also:
@@ -117,6 +126,7 @@ pub fn main(init: std.process.Init) !void {
         .{ "context", context.runContext },
         .{ "family", family.runFamily },
         .{ "provenance", provenance.runProvenance },
+        .{ "blast", blast.runBlast },
     };
     inline for (dispatch) |d| {
         if (std.mem.eql(u8, mode, d[0])) {
@@ -128,6 +138,6 @@ pub fn main(init: std.process.Init) !void {
         }
     }
 
-    std.debug.print("irregex: unknown verb '{s}' (context | family | provenance; --help)\n", .{mode});
+    std.debug.print("irregex: unknown verb '{s}' (context | family | provenance | blast; --help)\n", .{mode});
     std.process.exit(2);
 }

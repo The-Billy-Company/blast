@@ -1,14 +1,14 @@
 ---
 doc_radar:
   counts:
-    - description: "the irregex face: dispatch, three verb drivers, schema, shared plumbing"
+    - description: "the irregex face: dispatch, four verb drivers, schema, shared plumbing"
       glob: libs/kernels/irregex/src/surface/face/irregex/*.zig
       unit: files
-      equals: 6
+      equals: 7
   sentinels:
-    - description: "main.zig lists exactly the three composed verbs on the unknown-verb line"
+    - description: "main.zig lists exactly the four composed verbs on the unknown-verb line"
       file: libs/kernels/irregex/src/surface/face/irregex/main.zig
-      contains: "context | family | provenance"
+      contains: "context | family | provenance | blast"
     - description: "the composed verbs are contract-documented, not CLI folklore"
       file: libs/kernels/irregex/contract/search_api.toml
       contains: "[compose.verbs]"
@@ -54,6 +54,18 @@ irregex provenance TEXT [--min-phrase N] [-C N] [--json]
     on the codex shelf; irregex then re-reads that file's CURRENT bytes and
     re-finds the phrase exactly — a phrase surfaces only if the live file still
     holds it (>=12-byte floor), never a stale line
+
+irregex blast SYMBOL [--budget N] [--json] [ROOT...]
+    what moves if I change this symbol? The live blast radius from CURRENT bytes
+    (no precomputed graph, so a mid-edit file counts the instant it saves): the
+    seed's definition site(s) + parser-free kind guess; direct.dependents
+    (functions referencing it, def/use classified) and direct.dependencies
+    (identifiers the seed's body resolves to their own def sites); tangential.twins
+    (compression kin of the seed's file — co-edit risk) and tangential.ripple
+    (same-language second-hop callers, hops=2); and comments that MENTION it
+    (the stale-doc / TODO / invariant surface). Exact and statistical evidence
+    stay in separate fields; --budget N trims the lowest-priority tail into
+    stats.omitted; scope defaults to the whole CWD corpus, narrowable with ROOT...
 ```
 
 Plus the conventions every irregex face keeps: `--help` / `--version` /
@@ -87,7 +99,9 @@ the hand-join loses:
 `context` and `family` require `ROOT...` or an explicit `--all`, so a composed
 query can never silently sweep `vendor/`/`.etc`. `provenance` needs no scope:
 it reads the corpus-wide codex shelf (`relate index --shelf` / `gist codex
-build`).
+build`). `blast` is corpus-wide by nature (a blast radius that stopped at a
+directory would lie), so it defaults to the whole CWD corpus, narrowable with
+`ROOT...`.
 
 ## When to edit here
 
@@ -95,9 +109,10 @@ build`).
 - Exit-code / stdout vs stderr framing changes.
 
 This directory is only the face: `main.zig` classifies the verb and hands off
-to the sibling drivers (`context.zig` · `family.zig` · `provenance.zig`), with
-shared PatternSet-compile + mask-decode plumbing in `shared.zig` and the JSON
-manifest in `schema.zig`. The composition kernels — pure, I/O-free — live under
+to the sibling drivers (`context.zig` · `family.zig` · `provenance.zig` ·
+`blast.zig`), with shared PatternSet-compile + mask-decode plumbing in
+`shared.zig` and the JSON manifest in `schema.zig`. The composition kernels —
+pure, I/O-free — live under
 [`src/search/compose/`](../../search/compose/README.md). `gist` and `relate`
 are unchanged; this face forwards none of their verbs.
 
