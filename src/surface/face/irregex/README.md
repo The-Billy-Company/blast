@@ -21,7 +21,7 @@ doc_radar:
 `gist` answers _"where is this exact pattern?"_ and `relate` answers _"what is
 this text like / which files cover it / what forked?"_. `irregex` is the third
 face, for the questions that need **both** engines at once
-([ADR-367](../../../../../../docs/architecture/3-decisions/367-composed-irregex-cli.md)):
+([ADR-367](../../../../../../../docs/architecture/3-decisions/367-composed-irregex-cli.md)):
 the exact engine narrows the corpus to a typed candidate set, then the
 compression engine reasons **only inside that narrowing**.
 
@@ -113,8 +113,8 @@ to the sibling drivers (`context.zig` · `family.zig` · `provenance.zig` ·
 `blast.zig`), with shared PatternSet-compile + mask-decode plumbing in
 `shared.zig` and the JSON manifest in `schema.zig`. The composition kernels —
 pure, I/O-free — live under
-[`src/search/compose/`](../../search/compose/README.md). `gist` and `relate`
+[`src/kernel/compose/`](../../../kernel/compose/README.md). `gist` and `relate`
 are unchanged; this face forwards none of their verbs.
 
 Contract authority for the composed verbs and the `CandidateSet` model:
-[`../../../contract/search_api.toml`](../../../contract/search_api.toml).
+[`../../../../contract/search_api.toml`](../../../../contract/search_api.toml).

@@ -22,7 +22,7 @@
 //!
 //! Plus `--help`, `--version`, `--schema` (a JSON capability manifest). Thin
 //! dispatch only: verb drivers live beside this file; the composition kernels
-//! live under `src/search/compose/`, reached through the `irregex` module.
+//! live under `src/kernel/compose/`, reached through the `irregex` module.
 //! `gist` and `relate` are unchanged — this face forwards none of their verbs.
 
 const std = @import("std");
