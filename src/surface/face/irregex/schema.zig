@@ -37,6 +37,11 @@ const manifest =
     \\  "scoring": "exact and compression signals stay in SEPARATE fields — no fused relevance number",
     \\  "corpus_policy": "context/family load the INDEX corpus under the roots and REQUIRE a scope (ROOT... or --all); provenance reads the corpus-wide codex shelf; blast scopes to the whole CWD corpus by default, narrowable with ROOT...",
     \\  "output_stream": {"results": "stdout", "diagnostics": "stderr"},
+    \\  "trace": {
+    \\    "summary": "phase-trace diagnostics on stderr, off by default; on a --json run the stderr diagnostic is one NDJSON record, so timing is machine-parseable alongside stdout results",
+    \\    "channel": "stderr",
+    \\    "env": {"GIST_TRACE": "comma-separated lenses (amend,journal,reconcile,warm,rank,index,query,session) or 'all'; off when unset", "GIST_TRACE_FORMAT": "text|json; defaults to the run's --json format"}
+    \\  },
     \\  "exit_codes": {"0": "verb ran (rows may be empty)", "2": "usage, parse, pattern, or missing-shelf error"}
     \\}
     \\

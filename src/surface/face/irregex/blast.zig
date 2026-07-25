@@ -22,14 +22,13 @@
 const std = @import("std");
 const corpus_mod = @import("../../../corpus/tree/corpus.zig");
 const cli_args = @import("../../exec/cold/argv/args.zig");
+const assay = @import("../../../assay/assay.zig");
 const blast = @import("../../../kernel/compose/blast.zig");
 const flags = @import("../../cli/flags.zig");
 const emit = @import("../../cli/emit.zig");
 
 const die = cli_args.die;
 const oom = cli_args.oom;
-const nowNs = cli_args.nowNs;
-const ms = cli_args.ms;
 
 const usage_msg = "usage: irregex blast SYMBOL [--budget N] [--json] [ROOT...]\n";
 
@@ -67,12 +66,12 @@ pub fn runBlast(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !v
     const sym = symbol orelse die(usage_msg, .{});
     if (sym.len == 0) die("irregex blast: empty SYMBOL\n", .{});
 
-    const t0 = nowNs(io);
+    var run = assay.Run.open(gpa, io, json);
     const rr = try flags.rootsOf(gpa, roots.items);
     defer rr.deinit(gpa);
     var corpus = try corpus_mod.load(gpa, io, rr.items);
     defer corpus.deinit();
-    const loaded_ns = nowNs(io);
+    const load_dur = run.lap();
 
     var report = try blast.compute(gpa, corpus.docs, corpus.paths, sym, .{});
     defer report.deinit();
@@ -84,13 +83,28 @@ pub fn runBlast(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !v
     if (json) renderJson(&out, gpa, &report, corpus.paths, &plan) else renderHuman(&out, gpa, &report, corpus.paths, &plan);
     corpus_mod.emitStdout(out.items);
 
-    std.debug.print("blast: {s} [{s}] · {d} files ({d} with symbol) · {d} dep / {d} deps / {d} twins / {d} ripple / {d} comments · {d} omitted · load {d:.0} ms · compute {d:.0} ms\n", .{
+    const compute_dur = run.elapsed().ms();
+    run.emit("blast: {s} [{s}] · {d} files ({d} with symbol) · {d} dep / {d} deps / {d} twins / {d} ripple / {d} comments · {d} omitted · load {d:.0} ms · compute {d:.0} ms\n", .{
         sym,                           @tagName(report.kind),
         report.stats.files_scanned,    report.stats.files_with_symbol,
         report.stats.dependents_total, report.stats.dependencies_total,
         report.stats.twins_total,      report.stats.ripple_total,
         report.stats.comments_total,   report.stats.omitted + plan.omitted,
-        ms(loaded_ns - t0),            ms(nowNs(io) - loaded_ns),
+        load_dur.ms(),                 compute_dur,
+    }, .{
+        .{ "verb", "s", "blast" },
+        .{ "symbol", "s", sym },
+        .{ "kind", "s", @tagName(report.kind) },
+        .{ "files", "d", report.stats.files_scanned },
+        .{ "files_with_symbol", "d", report.stats.files_with_symbol },
+        .{ "dependents", "d", report.stats.dependents_total },
+        .{ "dependencies", "d", report.stats.dependencies_total },
+        .{ "twins", "d", report.stats.twins_total },
+        .{ "ripple", "d", report.stats.ripple_total },
+        .{ "comments", "d", report.stats.comments_total },
+        .{ "omitted", "d", report.stats.omitted + plan.omitted },
+        .{ "load_ms", "d:.0", load_dur.ms() },
+        .{ "compute_ms", "d:.0", compute_dur },
     });
 }
 

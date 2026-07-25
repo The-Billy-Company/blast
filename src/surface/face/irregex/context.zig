@@ -21,6 +21,7 @@
 const std = @import("std");
 const corpus_mod = @import("../../../corpus/tree/corpus.zig");
 const cli_args = @import("../../exec/cold/argv/args.zig");
+const assay = @import("../../../assay/assay.zig");
 const candidates = @import("../../../kernel/compose/candidates.zig");
 const context = @import("../../../kernel/compose/context.zig");
 const patterns_mod = @import("../../../kernel/batch/patterns.zig");
@@ -30,8 +31,6 @@ const shared = @import("shared.zig");
 
 const die = cli_args.die;
 const oom = cli_args.oom;
-const nowNs = cli_args.nowNs;
-const ms = cli_args.ms;
 
 const usage_msg = "usage: irregex context TEXT -e PATTERN [-e PATTERN...] [--match any|all] [-F] [-i] [--top N] [--json] {{ROOT... | --all}}\n";
 
@@ -61,12 +60,13 @@ pub fn runContext(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) 
     var set = shared.compileSet(gpa, pats.items, c.fixed, c.ignore_case) catch |e| shared.dieCompile(e);
     defer set.deinit(gpa);
 
-    const t0 = nowNs(io);
+    const run = assay.Run.open(gpa, io, c.json);
     const rr = try flags.rootsOf(gpa, roots.items);
     defer rr.deinit(gpa);
     var corpus = try corpus_mod.load(gpa, io, rr.items);
     defer corpus.deinit();
-    const loaded_ns = nowNs(io);
+    const load_dur = run.elapsed();
+    const pack_span = assay.Span.open(io);
 
     var cset = candidates.select(gpa, corpus.docs, &set, match) catch |e| shared.dieCompile(e);
     defer cset.deinit();
@@ -76,7 +76,15 @@ pub fn runContext(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) 
 
     if (cset.count() == 0) {
         corpus_mod.emitStdout("");
-        std.debug.print("context: {d} files · 0 candidates for {d} pattern(s) [{s}] · {d:.0} ms\n", .{ corpus.docs.len, pats.items.len, @tagName(match), ms(nowNs(io) - t0) });
+        const dur = run.elapsed().ms();
+        run.emit("context: {d} files · 0 candidates for {d} pattern(s) [{s}] · {d:.0} ms\n", .{ corpus.docs.len, pats.items.len, @tagName(match), dur }, .{
+            .{ "verb", "s", "context" },
+            .{ "files", "d", corpus.docs.len },
+            .{ "candidates", "d", @as(usize, 0) },
+            .{ "patterns", "d", pats.items.len },
+            .{ "match", "s", @tagName(match) },
+            .{ "ms", "d:.0", dur },
+        });
         return;
     }
 
@@ -102,7 +110,8 @@ pub fn runContext(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) 
         packed_result.picks[packed_result.picks.len - 1].coverage * 100.0
     else
         0.0;
-    std.debug.print("context: {d} files · {d} candidate(s) [{s}] · {d} pick(s) cover {d:.1}% of {d:.1} priced bits · {d} foreign chunk(s) · load {d:.0} ms · pack {d:.0} ms\n", .{
+    const pack_dur = pack_span.read(io).ms();
+    run.emit("context: {d} files · {d} candidate(s) [{s}] · {d} pick(s) cover {d:.1}% of {d:.1} priced bits · {d} foreign chunk(s) · load {d:.0} ms · pack {d:.0} ms\n", .{
         corpus.docs.len,
         packed_result.candidates,
         @tagName(match),
@@ -110,7 +119,18 @@ pub fn runContext(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) 
         covered_pct,
         packed_result.total_bits,
         packed_result.foreign,
-        ms(loaded_ns - t0),
-        ms(nowNs(io) - loaded_ns),
+        load_dur.ms(),
+        pack_dur,
+    }, .{
+        .{ "verb", "s", "context" },
+        .{ "files", "d", corpus.docs.len },
+        .{ "candidates", "d", packed_result.candidates },
+        .{ "match", "s", @tagName(match) },
+        .{ "picks", "d", packed_result.picks.len },
+        .{ "coverage_pct", "d:.1", covered_pct },
+        .{ "priced_bits", "d:.1", packed_result.total_bits },
+        .{ "foreign", "d", packed_result.foreign },
+        .{ "load_ms", "d:.0", load_dur.ms() },
+        .{ "pack_ms", "d:.0", pack_dur },
     });
 }

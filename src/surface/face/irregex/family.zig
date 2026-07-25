@@ -16,6 +16,7 @@
 const std = @import("std");
 const corpus_mod = @import("../../../corpus/tree/corpus.zig");
 const cli_args = @import("../../exec/cold/argv/args.zig");
+const assay = @import("../../../assay/assay.zig");
 const family_mod = @import("../../../kernel/compose/family.zig");
 const regions = @import("../../../kernel/compose/regions.zig");
 const flags = @import("../../cli/flags.zig");
@@ -24,8 +25,6 @@ const shared = @import("shared.zig");
 
 const die = cli_args.die;
 const oom = cli_args.oom;
-const nowNs = cli_args.nowNs;
-const ms = cli_args.ms;
 
 const Only = enum { all, family, distinct };
 const usage_msg = "usage: irregex family PATTERN [--unit function|match|file] [--max-structure-distance T | --max-distance T | --echo-min E] [-C N] [--min-size N] [--only family|distinct|all] [--brief] [-F] [-i] [--top N] [--json] {{ROOT... | --all}}\n";
@@ -94,12 +93,12 @@ pub fn runFamily(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !
     var set = shared.compileSet(gpa, &.{pat}, c.fixed, c.ignore_case) catch |e| shared.dieCompile(e);
     defer set.deinit(gpa);
 
-    const t0 = nowNs(io);
+    var run = assay.Run.open(gpa, io, c.json);
     const rr = try flags.rootsOf(gpa, roots.items);
     defer rr.deinit(gpa);
     var corpus = try corpus_mod.load(gpa, io, rr.items);
     defer corpus.deinit();
-    const loaded_ns = nowNs(io);
+    const load_dur = run.lap();
 
     const searchable = try gpa.alloc([]const u8, corpus.docs.len);
     defer gpa.free(searchable);
@@ -190,7 +189,8 @@ pub fn runFamily(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !
     }
     corpus_mod.emitStdout(out.items);
 
-    std.debug.print("family: {d} files · {d} {s} candidate(s) for '{s}' · {d} edge(s) · {d} family(s) · {d} distinct · load {d:.0} ms · graph {d:.0} ms\n", .{
+    const graph_dur = run.elapsed().ms();
+    run.emit("family: {d} files · {d} {s} candidate(s) for '{s}' · {d} edge(s) · {d} family(s) · {d} distinct · load {d:.0} ms · graph {d:.0} ms\n", .{
         corpus.docs.len,
         selected.items.len,
         unit_name,
@@ -198,8 +198,19 @@ pub fn runFamily(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !
         analysis.edges,
         analysis.list.len,
         analysis.distinct.len,
-        ms(loaded_ns - t0),
-        ms(nowNs(io) - loaded_ns),
+        load_dur.ms(),
+        graph_dur,
+    }, .{
+        .{ "verb", "s", "family" },
+        .{ "files", "d", corpus.docs.len },
+        .{ "candidates", "d", selected.items.len },
+        .{ "unit", "s", unit_name },
+        .{ "pattern", "s", pat },
+        .{ "edges", "d", analysis.edges },
+        .{ "families", "d", analysis.list.len },
+        .{ "distinct", "d", analysis.distinct.len },
+        .{ "load_ms", "d:.0", load_dur.ms() },
+        .{ "graph_ms", "d:.0", graph_dur },
     });
 }
 
