@@ -69,7 +69,9 @@ irregex blast SYMBOL [--budget N] [--json] [ROOT...]
     (functions referencing it, def/use classified) and direct.dependencies
     (what the seed's body leans on, minus its own parameters and locals, homed
     inside the seed's package — a `head.member` resolves only in the file its
-    head names, never against the nearest same-named declaration in the tree);
+    head names, never against the nearest same-named declaration in the tree,
+    and a name a packageful of files declares is ambient rather than a
+    dependency unless the seed's own file declares or imports it);
     tangential.twins
     (compression kin of the seed's file — co-edit risk) and tangential.ripple
     (same-language second-hop callers, hops=2); and comments that MENTION it
