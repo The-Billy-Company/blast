@@ -1,14 +1,21 @@
 ---
 doc_radar:
   counts:
-    - description: "the irregex face: dispatch, four verb drivers, schema, shared plumbing"
+    - description: "the irregex face: dispatch shell, four verb drivers, the verb table, shared plumbing"
       glob: libs/kernels/irregex/src/surface/face/irregex/*.zig
       unit: files
       equals: 7
+  occurrences:
+    - description: "the verb table declares exactly four composed verbs, each owning its handler"
+      file: libs/kernels/irregex/src/surface/face/irregex/repertoire.zig
+      pattern: '\.run = '
+      equals: 4
   sentinels:
-    - description: "main.zig lists exactly the four composed verbs on the unknown-verb line"
+    - description: "the binary is its repertoire and nothing else — the process is rendered too"
       file: libs/kernels/irregex/src/surface/face/irregex/main.zig
-      contains: "context | family | provenance | blast"
+      contains:
+        - "manifest.drive("
+        - "compose_repertoire.face"
     - description: "the composed verbs are contract-documented, not CLI folklore"
       file: libs/kernels/irregex/contract/search_api.toml
       contains: "[compose.verbs]"
@@ -60,7 +67,10 @@ irregex blast SYMBOL [--budget N] [--json] [ROOT...]
     (no precomputed graph, so a mid-edit file counts the instant it saves): the
     seed's definition site(s) + parser-free kind guess; direct.dependents
     (functions referencing it, def/use classified) and direct.dependencies
-    (identifiers the seed's body resolves to their own def sites); tangential.twins
+    (what the seed's body leans on, minus its own parameters and locals, homed
+    inside the seed's package — a `head.member` resolves only in the file its
+    head names, never against the nearest same-named declaration in the tree);
+    tangential.twins
     (compression kin of the seed's file — co-edit risk) and tangential.ripple
     (same-language second-hop callers, hops=2); and comments that MENTION it
     (the stale-doc / TODO / invariant surface). Exact and statistical evidence
@@ -108,10 +118,16 @@ directory would lie), so it defaults to the whole CWD corpus, narrowable with
 - A composed verb, flag, help string, or `--schema` field changes.
 - Exit-code / stdout vs stderr framing changes.
 
-This directory is only the face: `main.zig` classifies the verb and hands off
-to the sibling drivers (`context.zig` · `family.zig` · `provenance.zig` ·
-`blast.zig`), with shared PatternSet-compile + mask-decode plumbing in
-`shared.zig` and the JSON manifest in `schema.zig`. The composition kernels —
+This directory is only the face. `repertoire.zig` declares the four composed
+verbs once — usage form, both descriptions, typed flags, and the handler that
+runs each — and [`surface/cli/manifest.zig`](../../cli/manifest.zig) renders
+`--help`, `--schema`, the dispatch, the unknown-verb line, and the process
+itself from that table, the same way relate's face does. `main.zig` therefore
+holds no surface at all: it names its repertoire and hands over, which is why
+the two faces' entrypoints are now the same six lines with a different table.
+The work lives in the sibling drivers (`context.zig` · `family.zig` ·
+`provenance.zig` · `blast.zig`), with shared PatternSet-compile + mask-decode
+plumbing in `shared.zig`. The composition kernels —
 pure, I/O-free — live under
 [`src/kernel/compose/`](../../../kernel/compose/README.md). `gist` and `relate`
 are unchanged; this face forwards none of their verbs.
