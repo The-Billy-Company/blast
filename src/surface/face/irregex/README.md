@@ -1,15 +1,15 @@
 ---
 doc_radar:
   counts:
-    - description: "the irregex face: dispatch shell, four verb drivers, the verb table, shared plumbing"
+    - description: "the irregex face: dispatch shell, two verb drivers, the verb table, shared plumbing"
       glob: libs/kernels/irregex/src/surface/face/irregex/*.zig
       unit: files
-      equals: 7
+      equals: 5
   occurrences:
-    - description: "the verb table declares exactly four composed verbs, each owning its handler"
+    - description: "the verb table declares exactly two composed verbs, each owning its handler"
       file: libs/kernels/irregex/src/surface/face/irregex/repertoire.zig
       pattern: '\.run = '
-      equals: 4
+      equals: 2
   sentinels:
     - description: "the binary is its repertoire and nothing else — the process is rendered too"
       file: libs/kernels/irregex/src/surface/face/irregex/main.zig
@@ -27,34 +27,13 @@ doc_radar:
 
 `gist` answers _"where is this exact pattern?"_ and `relate` answers _"what is
 this text like / which files cover it / what forked?"_. `irregex` is the third
-face, for the questions that need **both** engines at once
-([ADR-367](../../../../../../../docs/architecture/3-decisions/367-composed-irregex-cli.md)):
-the exact engine narrows the corpus to a typed candidate set, then the
-compression engine reasons **only inside that narrowing**.
+face, for the two questions that need **current bytes** rather than a narrowing
+([ADR-367](../../../../../../../docs/architecture/3-decisions/367-composed-irregex-cli.md)).
+Composition-as-narrowing is a modifier on relate —
+`relate pack --matching` and `relate echoes --matching` are what
+`irregex context` / `irregex family` were.
 
 ```text
-irregex context TEXT -e P [-e P...] [--match any|all] [-F] [-i]
-                [--top N] [--json] {ROOT... | --all}
-    the minimal non-redundant reading set among files that ACTUALLY match the
-    -e patterns. The patterns compile to a PatternSet (the match half);
-    candidates.select narrows the corpus to the docs they admit (any = >=1
-    pattern, all = every pattern); then greedy submodular coverage (the relate
-    half) packs TEXT over a lexicon built from ONLY those docs — so a file the
-    patterns never hit can never be picked
-
-irregex family PATTERN [--unit function|match|file]
-               [--max-structure-distance T | --max-distance T | --echo-min E]
-               [-C N] [--only family|distinct|all] [--brief]
-               [-F] [-i] [--top N] [--json] {ROOT... | --all}
-    compare the implementations that match PATTERN, not their containing
-    files. Function is the default unit; match gives bounded line windows and
-    file preserves whole-file analysis. Structural families surface together;
-    every genuinely distinct region remains visible with its nearest neighbor
-    and separate structure/byte distances. Families rank by conservative
-    consolidation opportunity: shortest member lines × redundant copies ×
-    channel confidence. --brief emits only one compact line per family, with
-    paths relative to the requested scope; --only selects either answer class
-
 irregex provenance TEXT [--min-phrase N] [-C N] [--json]
     where did this pasted text come from, and does the tree still contain it?
     relate's quotation attribution names one exemplar file per verbatim phrase
@@ -65,7 +44,10 @@ irregex provenance TEXT [--min-phrase N] [-C N] [--json]
 irregex blast SYMBOL [--budget N] [--json] [ROOT...]
     what moves if I change this symbol? The live blast radius from CURRENT bytes
     (no precomputed graph, so a mid-edit file counts the instant it saves): the
-    seed's definition site(s) + parser-free kind guess; direct.dependents
+    seed's definition site(s) + parser-free kind guess (only a source file can
+    declare, so a definition list in prose or a key in a spec is a mention, and
+    the body read for dependencies belongs to the STRONGEST definition rather
+    than whichever weak shape sorts first alphabetically); direct.dependents
     (functions referencing it, def/use classified) and direct.dependencies
     (what the seed's body leans on, minus its own parameters and locals, homed
     inside the seed's package — a `head.member` resolves only in the file its
@@ -86,49 +68,52 @@ diagnostics on stderr, unknown verbs exit 2.
 
 ## Why compose instead of piping the two faces
 
-`gist -l | relate pack` and `gist -l | relate clusters` throw the match
+`gist -l | relate pack` and `gist -l | relate echoes` throw the match
 information away between steps and pay whole-corpus statistical noise —
 README/changelog files that never matched still rank high on coverage, and a
-whole-tree clusters sweep can't scope to a symbol. Composing keeps two things
-the hand-join loses:
+whole-tree repetition sweep can't scope to a symbol. Composing (whether as the
+`--matching` modifier on relate or as a verb here) keeps three things the
+hand-join loses:
 
-- The **exact selector bounds the statistical work.** `context` builds its
-  coverage lexicon from the candidate docs alone; `family` builds its kinship
-  graph over exact-hit functions or windows alone. Noise the patterns excluded
-  and unrelated bytes elsewhere in a matching file are gone before compression
-  runs.
-- **Similarity and difference are both answers.** Family members identify
-  consolidation candidates. Distinct regions are not dropped as singletons:
-  each carries the closest structural neighbor and both independent distances,
+- The **exact selector bounds the statistical work.** `pack --matching` builds
+  its coverage lexicon from the candidate docs alone; `echoes --matching` builds
+  its kinship graph over exact-hit units alone. Noise the patterns excluded and
+  unrelated bytes elsewhere in a matching file are gone before compression runs —
+  which also means the noise floors are calibrated against the matching set
+  rather than the corpus.
+- **Similarity and difference are both answers.** Families identify
+  consolidation candidates; `--shape distinct` keeps the singletons rather than
+  dropping them, each carrying its closest miss and both independent distances,
   so a reviewer can see why similar names do not imply the same implementation.
-- The **scores stay separate.** Each `context` pick carries the patterns that
-  admitted it _and_ its marginal bits; there is no fused, uncalibrated
+- The **scores stay separate.** Each narrowed `pack` pick carries the patterns
+  that admitted it _and_ its marginal bits; there is no fused, uncalibrated
   relevance number. `provenance` never reports a line the current bytes can't
   confirm.
 
-## Scope is mandatory
+## Scope
 
-`context` and `family` require `ROOT...` or an explicit `--all`, so a composed
-query can never silently sweep `vendor/`/`.etc`. `provenance` needs no scope:
-it reads the corpus-wide codex shelf (`relate index --shelf` / `gist codex
-build`). `blast` is corpus-wide by nature (a blast radius that stopped at a
-directory would lie), so it defaults to the whole CWD corpus, narrowable with
-`ROOT...`.
+`provenance` needs none: it reads the corpus-wide codex shelf (`relate index
+--shelf` / `gist codex build`). `blast` is corpus-wide by nature (a blast radius
+that stopped at a directory would lie), so it defaults to the whole CWD corpus,
+narrowable with `ROOT...`. The narrowing questions moved to `relate`, where
+`--matching` requires `ROOT...` or an explicit `--all` — a composed query can
+never silently sweep `vendor/`/`.etc`.
 
 ## When to edit here
 
 - A composed verb, flag, help string, or `--schema` field changes.
 - Exit-code / stdout vs stderr framing changes.
 
-This directory is only the face. `repertoire.zig` declares the four composed
-verbs once — usage form, both descriptions, typed flags, and the handler that
-runs each — and [`surface/cli/manifest.zig`](../../cli/manifest.zig) renders
+This directory is only the face. `repertoire.zig` declares the composed verbs
+once — usage form, both descriptions, typed flags, and the handler that
+runs each, plus the **retired** table that teaches `irregex context` / `irregex
+family` their new relate spelling instead of answering "unknown command" — and
+[`surface/cli/manifest.zig`](../../cli/manifest.zig) renders
 `--help`, `--schema`, the dispatch, the unknown-verb line, and the process
 itself from that table, the same way relate's face does. `main.zig` therefore
 holds no surface at all: it names its repertoire and hands over, which is why
 the two faces' entrypoints are now the same six lines with a different table.
-The work lives in the sibling drivers (`context.zig` · `family.zig` ·
-`provenance.zig` · `blast.zig`), with shared PatternSet-compile + mask-decode
+The work lives in the sibling drivers (`provenance.zig` · `blast.zig`), with shared PatternSet-compile + mask-decode
 plumbing in `shared.zig`. The composition kernels —
 pure, I/O-free — live under
 [`src/kernel/compose/`](../../../kernel/compose/README.md). `gist` and `relate`

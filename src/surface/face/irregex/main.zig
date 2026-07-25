@@ -1,15 +1,19 @@
 //! irregex — the composed-search CLI (the `irregex` binary, ADR-367).
 //!
 //! The third product face over the one irregex kernel. Where `gist` answers
-//! "where is this exact pattern?" and `relate` answers "what is this like / what
-//! covers it / what forked?", `irregex` answers the questions that need BOTH at
-//! once — the exact engine to narrow the corpus and the compression engine to
-//! reason inside that narrowing:
+//! "where is this exact pattern?" and `relate` answers "what is near this one /
+//! what repeats among all of them?", `irregex` answers the two questions that
+//! need BOTH engines over the tree's CURRENT bytes:
 //!
-//!   irregex context TEXT -e P…    the reading set among files that MATCH
-//!   irregex family PATTERN        forks/twins among the matching implementations
 //!   irregex provenance TEXT       attribution re-verified against current bytes
 //!   irregex blast SYMBOL          the live blast radius, from CURRENT bytes
+//!
+//! Composition-as-NARROWING is no longer a verb here. Narrowing the population
+//! by an exact filter turned out to be a modifier on a question, not a question:
+//! `relate pack --matching P` and `relate echoes --matching P` are what `irregex
+//! context` and `irregex family` were, and being a flag they now combine with
+//! every other axis those verbs carry (unit, channel, answer shape) instead of
+//! freezing one point in that space per verb name.
 //!
 //! **Nothing about the surface is written here.** The verbs are declared once
 //! in `repertoire.zig` and rendered by `surface/cli/manifest.zig` into the
