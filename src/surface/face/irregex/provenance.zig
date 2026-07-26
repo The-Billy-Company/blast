@@ -19,7 +19,8 @@
 
 const std = @import("std");
 const corpus_mod = @import("../../../corpus/tree/corpus.zig");
-const codex_face = @import("../gist/lifecycle/codex.zig");
+const shelf_mod = @import("../../../corpus/index/codex/shelf.zig");
+const outcome = @import("../../cli/outcome.zig");
 const cli_args = @import("../../exec/cold/argv/args.zig");
 const assay = @import("../../../assay/assay.zig");
 const cento = @import("../../../corpus/index/codex/cento.zig");
@@ -63,7 +64,12 @@ pub fn runProvenance(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u
     if (query.len == 0) die("irregex provenance: empty TEXT\n", .{});
 
     const run = assay.Run.open(gpa, io, json);
-    var shelf = codex_face.loadShelf(gpa, io, "`relate index --shelf` (or `gist codex build`)");
+    var shelf = shelf_mod.open(gpa, io) catch |e| outcome.needArtifact(
+        e,
+        "codex shelf",
+        shelf_mod.shelfFile(),
+        "`relate index --shelf` (or `gist codex build`)",
+    );
     defer shelf.deinit(gpa);
 
     var parsed = try cento.parse(&shelf.cx, gpa, query);
@@ -84,7 +90,10 @@ pub fn runProvenance(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u
         }
         const phrase = query[ph.pos .. ph.pos + ph.len];
         const path: ?[]const u8 = blk: {
-            const pos = shelf.cx.posOf(ph.row) catch break :blk null;
+            const pos = switch (shelf.cx.posOf(ph.row)) {
+                .declined => break :blk null,
+                .got => |p| p,
+            };
             break :blk shelf.paths[shelf.docOf(pos)];
         };
         // Re-read the exemplar's CURRENT bytes and re-find the phrase exactly.
@@ -109,7 +118,7 @@ pub fn runProvenance(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u
     }
     corpus_mod.emitStdout(out.items);
 
-    const stale = codex_face.shelfStaleCount(gpa, io, shelf.built_ns);
+    const stale = shelf_mod.staleCount(gpa, io, shelf.built_ns);
     if (stale > 0)
         assay.diag("provenance: {d} file(s) changed since the shelf was built — `relate index --shelf` refreshes\n", .{stale});
     run.emit("provenance: {d} phrase(s) located · {d} drifted · {d} skipped (escape/<{d}B) · {d} files in shelf · load+parse {d:.0} ms\n", .{

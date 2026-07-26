@@ -32,6 +32,7 @@ pub const face = manifest.Face{
                 .{ .name = "--json", .kind = "bool", .default = .{ .boolean = false }, .doc = "NDJSON {text, occurrences, source, verified, line} rows" },
             },
             .run = provenance.runProvenance,
+            .keeps = true,
         },
         .{
             .name = "blast",
@@ -48,6 +49,7 @@ pub const face = manifest.Face{
                 .{ .name = "--json", .kind = "bool", .default = .{ .boolean = false }, .doc = "one JSON report {seed, direct{dependents,dependencies}, tangential{twins,ripple}, comments, stats, notes}" },
             },
             .run = blast.runBlast,
+            .keeps = true,
         },
     },
     .retired = &.{
