@@ -154,11 +154,13 @@ fn emit(out: *std.ArrayList(u8), gpa: std.mem.Allocator, json: bool, phrase: []c
         return;
     }
     if (hit) |h| {
-        out.print(gpa, "{s}:{d}\n", .{ path.?, h.loc.line }) catch oom();
+        out.print(gpa, "{s}\n", .{emit_mod.locator(gpa, path.?, h.loc.line)}) catch oom();
         var lines = std.mem.splitScalar(u8, h.loc.context(h.bytes), '\n');
         while (lines.next()) |ln| out.print(gpa, "    {s}\n", .{ln}) catch oom();
     } else {
-        out.print(gpa, "(drift) {s}  ", .{path orelse "(not in corpus)"}) catch oom();
+        // A drift row names the file the phrase USED to be in, and the whole
+        // point of reading one is to go look — but only when there is a file.
+        out.print(gpa, "(drift) {s}  ", .{if (path) |p| emit_mod.anchor(gpa, p) else "(not in corpus)"}) catch oom();
         emit_mod.jsonStr(out, gpa, phrase);
         out.append(gpa, '\n') catch oom();
     }

@@ -142,7 +142,7 @@ fn renderHuman(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.
 
     out.appendSlice(gpa, "seed:\n") catch oom();
     if (r.def.len == 0) out.appendSlice(gpa, "  (no definition site found)\n") catch oom();
-    for (r.def) |s| out.print(gpa, "  {s}:{d}\n", .{ paths[s.doc], s.line }) catch oom();
+    for (r.def) |s| out.print(gpa, "  {s}\n", .{emit.locator(gpa, paths[s.doc], s.line)}) catch oom();
 
     if (r.dependents.len > 0) {
         out.print(gpa, "direct dependents ({d} of {d}):\n", .{ r.dependents.len, r.stats.dependents_total }) catch oom();
@@ -150,9 +150,9 @@ fn renderHuman(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.
             if (!plan.admit(rowCost(paths[d.doc].len + d.enclosing.len))) continue;
             const tag = if (d.defines) "def" else "use";
             if (d.enclosing.len > 0)
-                out.print(gpa, "  {s}:{d}  in {s}  [{s}]\n", .{ paths[d.doc], d.line, d.enclosing, tag }) catch oom()
+                out.print(gpa, "  {s}  in {s}  [{s}]\n", .{ emit.locator(gpa, paths[d.doc], d.line), d.enclosing, tag }) catch oom()
             else
-                out.print(gpa, "  {s}:{d}  [{s}]\n", .{ paths[d.doc], d.line, tag }) catch oom();
+                out.print(gpa, "  {s}  [{s}]\n", .{ emit.locator(gpa, paths[d.doc], d.line), tag }) catch oom();
         }
     }
 
@@ -160,7 +160,7 @@ fn renderHuman(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.
         out.print(gpa, "direct dependencies ({d}):\n", .{r.dependencies.len}) catch oom();
         for (r.dependencies) |d| {
             if (!plan.admit(rowCost(paths[d.doc].len + d.symbol.len))) continue;
-            out.print(gpa, "  {s}  {s}:{d}\n", .{ d.symbol, paths[d.doc], d.line }) catch oom();
+            out.print(gpa, "  {s}  {s}\n", .{ d.symbol, emit.locator(gpa, paths[d.doc], d.line) }) catch oom();
         }
     }
 
@@ -168,7 +168,7 @@ fn renderHuman(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.
         out.print(gpa, "comments ({d} of {d}):\n", .{ r.comments.len, r.stats.comments_total }) catch oom();
         for (r.comments) |c| {
             if (!plan.admit(rowCost(paths[c.doc].len + c.text.len))) continue;
-            out.print(gpa, "  {s}:{d}  {s}\n", .{ paths[c.doc], c.line, c.text }) catch oom();
+            out.print(gpa, "  {s}  {s}\n", .{ emit.locator(gpa, paths[c.doc], c.line), c.text }) catch oom();
         }
     }
 
@@ -176,7 +176,7 @@ fn renderHuman(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.
         out.print(gpa, "tangential twins ({d}):\n", .{r.twins.len}) catch oom();
         for (r.twins) |tw| {
             if (!plan.admit(rowCost(paths[tw.doc].len))) continue;
-            out.print(gpa, "  {s}  dist={d:.2}\n", .{ paths[tw.doc], tw.distance }) catch oom();
+            out.print(gpa, "  {s}  dist={d:.2}\n", .{ emit.anchor(gpa, paths[tw.doc]), tw.distance }) catch oom();
         }
     }
 
@@ -184,7 +184,7 @@ fn renderHuman(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.
         out.print(gpa, "tangential ripple ({d} of {d}):\n", .{ r.ripple.len, r.stats.ripple_total }) catch oom();
         for (r.ripple) |rp| {
             if (!plan.admit(rowCost(paths[rp.doc].len + rp.via.len))) continue;
-            out.print(gpa, "  {s}  via {s} (hops=2)\n", .{ paths[rp.doc], rp.via }) catch oom();
+            out.print(gpa, "  {s}  via {s} (hops=2)\n", .{ emit.anchor(gpa, paths[rp.doc]), rp.via }) catch oom();
         }
     }
 
