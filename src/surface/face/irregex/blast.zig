@@ -21,14 +21,13 @@
 
 const std = @import("std");
 const corpus_mod = @import("../../../corpus/tree/corpus.zig");
-const cli_args = @import("../../exec/cold/argv/args.zig");
 const assay = @import("../../../assay/assay.zig");
 const blast = @import("../../../kernel/compose/blast.zig");
 const flags = @import("../../cli/flags.zig");
 const emit = @import("../../cli/emit.zig");
 
-const die = cli_args.die;
-const oom = cli_args.oom;
+const die = @import("../../cli/outcome.zig").die;
+const oom = @import("../../cli/outcome.zig").oom;
 
 const usage_msg = "usage: irregex blast SYMBOL [--budget N] [--json] [ROOT...]\n";
 

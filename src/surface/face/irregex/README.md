@@ -1,10 +1,11 @@
 ---
+
 doc_radar:
   counts:
-    - description: "the irregex face: dispatch shell, two verb drivers, the verb table, shared plumbing"
+    - description: "the irregex face: dispatch shell, two verb drivers, the verb table"
       glob: libs/kernels/irregex/src/surface/face/irregex/*.zig
       unit: files
-      equals: 5
+      equals: 4
   occurrences:
     - description: "the verb table declares exactly two composed verbs, each owning its handler"
       file: libs/kernels/irregex/src/surface/face/irregex/repertoire.zig
