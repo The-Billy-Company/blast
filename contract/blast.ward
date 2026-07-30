@@ -1,0 +1,27 @@
+// blast — import topology.
+//
+// The composed face of the irregex ecosystem: one binary (`irregex`), two
+// verbs (`blast` · `provenance`), both of which need the exact engine and the
+// compression engine at once over CURRENT bytes. All three engines are
+// sibling modules (`irregex` · `relate` · `gist`) reached only through
+// `@import(...)` — a file import cannot cross a package boundary — so the
+// whole package is one thin face and its contract is correspondingly small.
+// Judged by `ward verify`.
+
+package blast {
+    // main.zig is the exe root: it drives gist's manifest over the local
+    // repertoire, which dispatches the two verb files.
+    root   src
+    facade surface/face/irregex/main.zig
+}
+
+// One tier — the face itself. The laws that matter here are the always-on
+// ones: no import may climb out of the module root (the engines are named
+// modules, never `../../` reaches into a sibling checkout), and no cycles.
+tiers {
+    face    surface/face/**
+}
+
+// Structural laws.
+limit  reach to 2 hops
+forbid cycles across directories
