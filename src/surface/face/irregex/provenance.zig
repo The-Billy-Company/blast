@@ -18,17 +18,17 @@
 //! no scope needed. Results stdout, diagnostics stderr.
 
 const std = @import("std");
-const corpus_mod = @import("../../../corpus/tree/corpus.zig");
-const shelf_mod = @import("../../../corpus/index/shelf/shelf.zig");
-const outcome = @import("../../cli/outcome.zig");
-const assay = @import("../../../assay/assay.zig");
-const cento = @import("../../../kernel/codex/cento.zig");
-const provenance = @import("../../../kernel/compose/provenance.zig");
-const flags = @import("../../cli/flags.zig");
-const emit_mod = @import("../../cli/emit.zig");
+const corpus_mod = @import("irregex").corpus;
+const shelf_mod = @import("relate").codex.shelf;
+const outcome = @import("irregex").inner.cli.outcome;
+const assay = @import("irregex").assay;
+const cento = @import("relate").codex.cento;
+const provenance = @import("relate").compose.provenance;
+const flags = @import("gist").cli.flags;
+const emit_mod = @import("irregex").inner.cli.emit;
 
-const die = @import("../../cli/outcome.zig").die;
-const oom = @import("../../cli/outcome.zig").oom;
+const die = @import("irregex").inner.cli.outcome.die;
+const oom = @import("irregex").inner.cli.outcome.oom;
 const Dir = std.Io.Dir;
 
 /// Default phrase floor: a matched phrase shorter than this is trivially shared

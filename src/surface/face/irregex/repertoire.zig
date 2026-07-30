@@ -9,7 +9,7 @@
 //! Rendering lives in `surface/cli/manifest.zig`; this file is only content.
 
 const std = @import("std");
-const manifest = @import("../../cli/manifest.zig");
+const manifest = @import("gist").cli.manifest;
 
 const provenance = @import("provenance.zig");
 const blast = @import("blast.zig");

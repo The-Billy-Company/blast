@@ -27,10 +27,11 @@
 
 const std = @import("std");
 const irregex = @import("irregex");
+const chassis = @import("gist");
 
 pub fn main(init: std.process.Init) void {
-    irregex.commands.manifest.drive(
-        irregex.commands.compose_repertoire.face,
+    chassis.cli.manifest.drive(
+        @import("repertoire.zig").face,
         irregex.version_string,
         init,
     );

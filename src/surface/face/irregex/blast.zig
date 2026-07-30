@@ -20,14 +20,14 @@
 //! nature); optional ROOT... narrows it. Results on stdout, diagnostics stderr.
 
 const std = @import("std");
-const corpus_mod = @import("../../../corpus/tree/corpus.zig");
-const assay = @import("../../../assay/assay.zig");
-const blast = @import("../../../kernel/compose/blast.zig");
-const flags = @import("../../cli/flags.zig");
-const emit = @import("../../cli/emit.zig");
+const corpus_mod = @import("irregex").corpus;
+const assay = @import("irregex").assay;
+const blast = @import("relate").compose.blast;
+const flags = @import("gist").cli.flags;
+const emit = @import("irregex").inner.cli.emit;
 
-const die = @import("../../cli/outcome.zig").die;
-const oom = @import("../../cli/outcome.zig").oom;
+const die = @import("irregex").inner.cli.outcome.die;
+const oom = @import("irregex").inner.cli.outcome.oom;
 
 const usage_msg = "usage: irregex blast SYMBOL [--budget N] [--json] [ROOT...]\n";
 
