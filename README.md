@@ -44,4 +44,4 @@ the engine suites underneath it. Architecture is machine-checked by
 Extracted from `billy/libs/kernels/irregex` (cut at billy@ce430bbaab,
 PLAN v5 split). Formerly the in-tree `irregex` composed face (ADR-367).
 Dev model: sibling checkouts via `build.zig.zon` path-deps; releases pin
-url + hash.
+url + hash. Apache-2.0, like the packages underneath it.

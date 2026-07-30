@@ -1,0 +1,1 @@
+Apache-2.0, matching the packages underneath it. Nothing third-party is bundled in a face this thin, so NOTICE carries only the copyright and points at `irregex`, `relate`, and `gist` for what they bundle.
