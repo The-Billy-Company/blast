@@ -19,7 +19,16 @@ pub fn build(b: *std.Build) void {
     else
         .{};
     const target = b.standardTargetOptions(.{ .default_target = default_target });
-    const optimize = b.standardOptimizeOption(.{});
+    _ = b.standardOptimizeOption(.{});
+
+    // ReleaseFast regardless of the build-wide `-Doptimize` — same product
+    // posture as gist's faces: a bare `zig build` must never install a slow
+    // debug `irregex`. `-Dcli-optimize=Debug` still yields a debug binary.
+    const optimize = b.option(
+        std.builtin.OptimizeMode,
+        "cli-optimize",
+        "optimize mode for the installed irregex CLI (default ReleaseFast — the product surface's whole point is speed)",
+    ) orelse .ReleaseFast;
 
     // Same target/optimize on every sibling, so the build system dedupes the
     // path deps into one instance each — gist's own irregex/relate imports and
