@@ -1,0 +1,27 @@
+# Standalone crate root — lifts out of this repo for a public release without
+# inheriting a parent workspace's lockfile or lint config.
+[workspace]
+
+[package]
+name = "blast"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "Importable Rust face of the blast composed verbs (provenance, blast radius)."
+publish = false
+
+exclude = [ "/target", "/.cargo" ]
+
+[dependencies]
+# Local path for in-tree development. Once `irregex` is on crates.io, consumers
+# resolve the same version range through the registry; the path override is
+# only for this checkout. Blast also depends on relate in Zig; the binding
+# only needs the shared substrate for row decode / transports.
+irregex = { version = "0.1.0", path = "../../../irregex/bindings/rust" }
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints.clippy]
+pedantic = { level = "allow", priority = -1 }
