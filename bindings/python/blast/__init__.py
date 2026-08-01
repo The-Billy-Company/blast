@@ -5,7 +5,7 @@ Both engines on one question: `blast` (what moves if this symbol changes) and
 
     import blast
 
-    radius = blast.blast("WalletService")
+    radius = blast.blast("SessionStore")
     print(radius.paths)
 """
 

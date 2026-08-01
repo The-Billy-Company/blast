@@ -25,7 +25,7 @@
 # ONLY inside that subset — and because that is one property of a question
 # rather than a different question, it is spelled `--matching PAT` on the relate
 # query verbs instead of duplicating their unit/channel/shape axes under second
-# names. `relate echoes --matching WalletService --shape families` is what
+# names. `relate echoes --matching SessionStore --shape families` is what
 # `irregex family` was; `relate pack --matching …` is what `irregex context`
 # was. The kernels stay pure and I/O-free under src/kernel/compose/.
 #

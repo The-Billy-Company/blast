@@ -77,7 +77,7 @@ hand-join loses:
 that stopped at a directory would lie), so it defaults to the whole CWD corpus,
 narrowable with `ROOT...`. The narrowing questions moved to `relate`, where
 `--matching` requires `ROOT...` or an explicit `--all` — a composed query can
-never silently sweep `vendor/`/`.etc`.
+never silently sweep `vendor/`/`upstream/`.
 ## Layout
 
 One tier: [`src/surface/face/blast/`](src/surface/face/blast/) - the
@@ -101,7 +101,7 @@ hops of reach, and no more.
 
 ## Provenance
 
-Extracted from a private monorepo package path (formerly
-`libs/kernels/irregex`, cut at ce430bbaab). Dev model is sibling
+Extracted from a package path inside a private monorepo
+(cut at ce430bbaab). Dev model is sibling
 checkouts via `build.zig.zon` path-deps; releases pin url + hash.
 Apache-2.0, like the packages underneath it.
