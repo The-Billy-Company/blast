@@ -1,12 +1,16 @@
 # Importable Python face of blast. Depends on `irregex` (substrate) and `relate`
 # (corpus helpers shared by composed verbs). Local checkouts resolve both path
 # editably; a published wheel depends on the PyPI distributions.
+#
+# The floor tracks the `irregex` substrate's, since this package cannot import
+# without it. There is no upper bound: the monorepo this was extracted from
+# pins one interpreter, but a published library has no business refusing 3.15.
 
 [project]
 name = "blast"
 version = "0.1.0"
 description = "Importable Python API for blast composed search verbs."
-requires-python = ">=3.14,<3.15"
+requires-python = ">=3.12"
 license = "Apache-2.0"
 dependencies = [
   "irregex",
