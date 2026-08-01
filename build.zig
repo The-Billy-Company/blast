@@ -123,4 +123,13 @@ pub fn build(b: *std.Build) void {
 
     // `zig build check` — compile without installing, for the edit loop.
     b.step("check", "Compile the blast binary without installing").dependOn(&exe.step);
+
+    // Same kcov lane the three sibling packages carry. Only the composed face's
+    // own sources are instrumented: the engines it composes are measured where
+    // they are written, and folding them in here would double-count them.
+    const run_cov = b.addSystemCommand(&.{ "kcov", "--clean", "--include-pattern=src/" });
+    run_cov.addArg(b.pathFromRoot(".local/coverage"));
+    run_cov.addArtifactArg(tests);
+    b.step("coverage", "Run unit tests under kcov → .local/coverage/ (Cobertura XML)")
+        .dependOn(&run_cov.step);
 }
