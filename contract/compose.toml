@@ -1,0 +1,60 @@
+# ═════════════════════════════════════════════════════════════════════════════
+#  blast's compose contract
+# ═════════════════════════════════════════════════════════════════════════════
+#
+# The two questions that need BOTH engines and current bytes, and the seam they
+# compose across. An exact `PatternSet` narrows the corpus to a typed candidate
+# set, the compression kernel runs only inside that subset, and the exact and
+# statistical scores stay in separate fields — never a fused number.
+#
+#   [compose]          the seam: candidate set · unit · distinct · scoring
+#   [compose.verbs]    provenance and blast
+#   [compose.retired]  the composed verbs that became a `--matching` flag
+#
+# Composition-as-narrowing is not here, because it is not blast's: `--matching`
+# is a modifier on relate's own verbs, declared with them.
+#
+# The rows these verbs return are substrate, declared with every other analytic
+# row in `irregex/contract/analytic.toml`; `blast_run` and its op codes are in
+# that file's `[analytic.producers]` / `[analytic.verbs]`.
+
+
+# ── [compose] — exact ∩ compression over one candidate set ───────────────────
+# Composition is a MODIFIER, not a face. The exact PatternSet (match) narrows
+# the corpus to a typed CandidateSet and the compression kernels (relate) run
+# ONLY inside that subset — and because that is one property of a question
+# rather than a different question, it is spelled `--matching PAT` on the relate
+# query verbs instead of duplicating their unit/channel/shape axes under second
+# names. `relate echoes --matching WalletService --shape families` is what
+# `irregex family` was; `relate pack --matching …` is what `irregex context`
+# was. The kernels stay pure and I/O-free under src/kernel/compose/.
+#
+# The `irregex` binary keeps the two composed workflows that are NOT a relate
+# question with a filter bolted on: `provenance` (quotation re-verified against
+# current bytes) and `blast` (a symbol's live radius, assembled from several
+# kernels). Throughout, the exact and statistical scores stay in separate fields
+# (a match mask versus compression bits); there is deliberately NO fused
+# relevance number.
+[compose]
+candidate_set = { detail = "the subset of loaded docs a PatternSet selects under match=any|all, each carrying a per-pattern match mask (up to 64 patterns); the exact-before-statistical seam every --matching query narrows through, so compression never sees a non-matching file" }
+comparison_unit = { detail = "a narrowed repetition query lifts its hits to whole files (--unit file), their enclosing functions (--unit function), or bounded match windows (--unit match) before compression, so unrelated bytes in a matching file cannot dominate implementation kinship. Region candidate sets verify every pair exactly rather than relying on seed nomination" }
+distinct = { detail = "units outside every admitted family stay first-class rows (--shape distinct) carrying their nearest miss plus separate structure_distance and byte_distance, so the complement of a family sweep is a measurement rather than an absence" }
+scoring = { detail = "exact and compression signals stay in SEPARATE fields (the match mask + the compression score); no fused relevance. Family display order uses a transparent consolidation heuristic only: repeated_lines = shortest member span × redundant copies, and opportunity score = repeated_lines × channel confidence (1-distance for a distance channel, the gap itself for twins)" }
+scope = { detail = "a --matching query is scoped like any relate query (positional ROOT..., else the index roots); provenance reads the whole codex shelf, which is corpus-wide already; blast defaults to the whole CWD corpus, since its radius is corpus-wide by nature, and narrows with ROOT..." }
+blast_tiers = { detail = "blast composes existing kernels into one bounded report from CURRENT bytes: seed (definition sites + parser-free kind guess), direct.dependents (word-bounded refs lifted to enclosing functions, def/use classified), direct.dependencies (identifiers inside the seed's body resolved to their own definition sites), tangential.twins (compression kin of the seed's file — co-edit risk), tangential.ripple (second-hop callers of the dependents, hops=2), and comments (comment-span mentions — the stale-doc/TODO/invariant surface). No precomputed graph, so a mid-edit file is reflected the instant it is saved" }
+
+# ── [compose.verbs] — the `blast` surface ────────────────────────────────────
+# Two workflows, because each assembles several kernels rather than filtering
+# one relate question. `provenance` reads the corpus-wide codex shelf
+# (`relate index --shelf` / `gist codex build`) and needs no scope; `blast`
+# defaults to the whole CWD corpus and narrows with ROOT.... See [compose].scope
+# for why the narrowed variants of `context`/`family` moved onto `relate`, and
+# [compose.retired] for the coaching table.
+[compose.verbs]
+provenance = { argv = "blast provenance TEXT [--min-phrase N] [-C N] [--json]", detail = "relate quotation attribution against the codex shelf, then current-byte gist verification + line context for every emitted phrase; a phrase is surfaced ONLY if its attributed exemplar file CURRENTLY contains it (default ≥12-byte phrase floor), so it never points at a phrase the live tree cannot show; -C N adds context lines around the current occurrence" }
+blast = { argv = "blast blast SYMBOL [--budget N] [--json] [ROOT...]", detail = "the live blast radius of a symbol from CURRENT bytes, with no precomputed graph — the tiers it reports are [compose].blast_tiers; --budget N is a soft token cap that trims the lowest-priority tail into stats.omitted" }
+
+# ── [compose.retired] — the composed verbs that became a flag ────────────────
+[compose.retired]
+context = { now = "relate pack <text> --matching PAT...", because = "narrowing is a modifier on a question, not a second question: as a flag it composes with pack's --top and roots instead of restating them" }
+family = { now = "relate echoes --matching PAT... --shape families", because = "the composed family verb WAS the repetition question with an exact filter — every axis it owned (unit, channel, shape, min-size) already exists on echoes" }
