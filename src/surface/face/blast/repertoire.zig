@@ -1,6 +1,6 @@
-//! irregex — what the composed face can do, declared once.
+//! blast — what the composed face can do, declared once.
 //!
-//! The single source for `irregex --help`, `irregex --schema`, verb dispatch,
+//! The single source for `blast --help`, `blast --schema`, verb dispatch,
 //! and the unknown-verb line, in the same shape as relate's repertoire. The
 //! two used to be separate hand-written JSON documents; `relate echoes` scored
 //! them at 0.038 structure distance while 0.66 apart in bytes — the same
@@ -9,15 +9,15 @@
 //! Rendering lives in `surface/cli/manifest.zig`; this file is only content.
 
 const std = @import("std");
-const manifest = @import("gist").cli.manifest;
+const manifest = @import("relate").cli.manifest;
 
 const provenance = @import("provenance.zig");
 const blast = @import("blast.zig");
 
 pub const face = manifest.Face{
-    .tool = "irregex",
-    .tagline = "irregex — composed search: exact match narrows, compression reasons inside",
-    .summary = "the composed face, for the two questions that need CURRENT bytes rather than a narrowing: provenance (quotation attribution re-verified against the live file) and blast (the live blast radius of a symbol, computed from current bytes with no precomputed graph). composition-as-narrowing became a modifier — `relate pack --matching` and `relate echoes --matching` are what `irregex context` and `irregex family` were, now combinable with every other axis those verbs have. gist and relate stay the direct faces.",
+    .tool = "blast",
+    .tagline = "blast — composed search: exact match narrows, compression reasons inside",
+    .summary = "the composed face, for the two questions that need CURRENT bytes rather than a narrowing: provenance (quotation attribution re-verified against the live file) and blast (the live blast radius of a symbol, computed from current bytes with no precomputed graph). composition-as-narrowing became a modifier — `relate pack --matching` and `relate echoes --matching` are what `irregex context` and `blast family` were, now combinable with every other axis those verbs have. gist and relate stay the direct faces.",
     .verbs = &.{
         .{
             .name = "provenance",
@@ -83,7 +83,7 @@ pub const face = manifest.Face{
     \\  blast (scope)             ROOT... narrows; default is the whole CWD corpus
     \\  --json                    NDJSON on stdout; diagnostics stay on stderr
     \\
-    \\composition is a flag now (ADR-367), not a verb:
+    \\composition is a flag now, not a verb:
     \\  relate pack --matching PAT <text>        the reading set among matching files
     \\  relate echoes --matching PAT --unit function --shape families
     \\                                           fork families among matching regions
@@ -95,9 +95,9 @@ pub const face = manifest.Face{
     \\  relate <verb> <text>      the direct compression-search face
     \\
     \\introspection:
-    \\  irregex --help / -h        this guide
-    \\  irregex --schema           versioned JSON verb contract for agents
-    \\  irregex --version / -V
+    \\  blast --help / -h        this guide
+    \\  blast --schema           versioned JSON verb contract for agents
+    \\  blast --version / -V
     \\
     ,
 };
@@ -106,7 +106,7 @@ pub const face = manifest.Face{
 
 const t = std.testing;
 
-test "irregex --schema is valid JSON naming the composed verbs that remain" {
+test "blast --schema is valid JSON naming the composed verbs that remain" {
     var arena = std.heap.ArenaAllocator.init(t.allocator);
     defer arena.deinit();
     const a = arena.allocator();
@@ -114,7 +114,7 @@ test "irregex --schema is valid JSON naming the composed verbs that remain" {
     manifest.schema(&buf, a, face, "0.2.0");
 
     const parsed = try std.json.parseFromSlice(std.json.Value, a, buf.items, .{});
-    try t.expectEqualStrings("irregex", parsed.value.object.get("tool").?.string);
+    try t.expectEqualStrings("blast", parsed.value.object.get("tool").?.string);
     const verbs = parsed.value.object.get("verbs").?.object;
     for ([_][]const u8{ "provenance", "blast" }) |v| try t.expect(verbs.contains(v));
     try t.expectEqual(@as(usize, 2), verbs.count());
@@ -123,7 +123,7 @@ test "irregex --schema is valid JSON naming the composed verbs that remain" {
 test "the narrowing verbs point at their relate replacement, in the other face" {
     // These two folded ACROSS binaries, so the coaching line names the tool it
     // moved to — `face.find` would be the wrong check here, and a bare verb name
-    // would send the caller to `irregex pack`, which does not exist.
+    // would send the caller to `blast pack`, which does not exist.
     for ([_][]const u8{ "context", "family" }) |name| {
         try t.expect(face.find(name) == null);
         const r = face.folded(name).?;

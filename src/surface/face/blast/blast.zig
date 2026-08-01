@@ -1,6 +1,6 @@
-//! irregex — the `blast` verb: a live symbol blast radius for editing agents.
+//! blast — the `blast` verb: a live symbol blast radius for editing agents.
 //!
-//!   irregex blast SYMBOL [--budget N] [--json] [ROOT...]
+//!   blast blast SYMBOL [--budget N] [--json] [ROOT...]
 //!       "if I change SYMBOL, what else moves?" — computed from the corpus as it
 //!       is RIGHT NOW (no precomputed graph, so a file mid-edit counts the moment
 //!       it is saved). The `blast` kernel composes exact word-bounded search, the
@@ -23,13 +23,13 @@ const std = @import("std");
 const corpus_mod = @import("irregex").corpus;
 const assay = @import("irregex").assay;
 const blast = @import("relate").compose.blast;
-const flags = @import("gist").cli.flags;
+const flags = @import("relate").cli.flags;
 const emit = @import("irregex").inner.cli.emit;
 
 const die = @import("irregex").inner.cli.outcome.die;
 const oom = @import("irregex").inner.cli.outcome.oom;
 
-const usage_msg = "usage: irregex blast SYMBOL [--budget N] [--json] [ROOT...]\n";
+const usage_msg = "usage: blast blast SYMBOL [--budget N] [--json] [ROOT...]\n";
 
 /// Approximate tokens a rendered row costs against `--budget` (≈4 bytes/token
 /// plus a small per-row framing constant). A soft accountant, not a tokenizer:
@@ -54,7 +54,7 @@ pub fn runBlast(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !v
         } else if (std.mem.eql(u8, arg, "--budget")) {
             budget = flags.count(argv, &i, "--budget");
         } else if (std.mem.startsWith(u8, arg, "-") and arg.len > 1 and symbol != null) {
-            die("irregex blast: unknown flag {s}\n", .{arg});
+            die("blast blast: unknown flag {s}\n", .{arg});
         } else if (symbol == null) {
             symbol = arg;
         } else {
@@ -63,7 +63,7 @@ pub fn runBlast(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !v
     }
 
     const sym = symbol orelse die(usage_msg, .{});
-    if (sym.len == 0) die("irregex blast: empty SYMBOL\n", .{});
+    if (sym.len == 0) die("blast blast: empty SYMBOL\n", .{});
 
     var run = assay.Run.open(gpa, io, json);
     const rr = try flags.rootsOf(gpa, roots.items);

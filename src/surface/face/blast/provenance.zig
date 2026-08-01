@@ -1,6 +1,6 @@
-//! irregex — the `provenance` verb: quotation attribution, gist-verified.
+//! blast — the `provenance` verb: quotation attribution, gist-verified.
 //!
-//!   irregex provenance TEXT [--min-phrase N] [-C N] [--json]
+//!   blast provenance TEXT [--min-phrase N] [-C N] [--json]
 //!       where did this text come from, and does the tree still contain it?
 //!       `relate quote`'s Ziv–Merhav cross-parse rewrites TEXT as maximal
 //!       verbatim phrases from the codex shelf and attributes each to one
@@ -12,19 +12,19 @@
 //! The invariant: a phrase is surfaced ONLY if its exemplar file currently
 //! contains it (default ≥12-byte floor drops trivial phrases). A phrase the
 //! current bytes cannot confirm is reported as drift, never located — provenance
-//! never points at a line the live tree no longer holds (ADR-367).
+//! never points at a line the live tree no longer holds.
 //!
 //! Reads the corpus-wide shelf (`relate index --shelf` / `gist codex build`);
 //! no scope needed. Results stdout, diagnostics stderr.
 
 const std = @import("std");
 const corpus_mod = @import("irregex").corpus;
-const shelf_mod = @import("relate").codex.shelf;
+const shelf_mod = @import("irregex").codex.shelf;
 const outcome = @import("irregex").inner.cli.outcome;
 const assay = @import("irregex").assay;
 const cento = @import("relate").codex.cento;
 const provenance = @import("relate").compose.provenance;
-const flags = @import("gist").cli.flags;
+const flags = @import("relate").cli.flags;
 const emit_mod = @import("irregex").inner.cli.emit;
 
 const die = @import("irregex").inner.cli.outcome.die;
@@ -35,7 +35,7 @@ const Dir = std.Io.Dir;
 /// (`the `, `();`) and names no real provenance — drop it from the report.
 const default_min_phrase = 12;
 
-const usage_msg = "usage: irregex provenance TEXT [--min-phrase N] [-C N] [--json]\n";
+const usage_msg = "usage: blast provenance TEXT [--min-phrase N] [-C N] [--json]\n";
 
 pub fn runProvenance(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !void {
     var text: ?[]const u8 = null;
@@ -53,14 +53,14 @@ pub fn runProvenance(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u
         } else if (std.mem.eql(u8, arg, "--json")) {
             json = true;
         } else if (std.mem.startsWith(u8, arg, "-") and arg.len > 1 and text != null) {
-            die("irregex provenance: unknown flag {s}\n", .{arg});
+            die("blast provenance: unknown flag {s}\n", .{arg});
         } else if (text == null) {
             text = arg;
         } else die(usage_msg, .{});
     }
 
     const query = text orelse die(usage_msg, .{});
-    if (query.len == 0) die("irregex provenance: empty TEXT\n", .{});
+    if (query.len == 0) die("blast provenance: empty TEXT\n", .{});
 
     const run = assay.Run.open(gpa, io, json);
     var shelf = shelf_mod.open(gpa, io) catch |e| outcome.needArtifact(

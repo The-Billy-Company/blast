@@ -1,26 +1,43 @@
 // blast — import topology.
 //
-// The composed face of the irregex ecosystem: one binary (`irregex`), two
+// The composed face of the irregex ecosystem: one binary (`blast`), two
 // verbs (`blast` · `provenance`), both of which need the exact engine and the
-// compression engine at once over CURRENT bytes. All three engines are
-// sibling modules (`irregex` · `relate` · `gist`) reached only through
-// `@import(...)` — a file import cannot cross a package boundary — so the
-// whole package is one thin face and its contract is correspondingly small.
-// Judged by `ward verify`.
+// compression engine at once over CURRENT bytes, plus the C-ABI producer
+// (`libblast` / `blast_run`). The engines are sibling modules (`irregex` ·
+// `relate` · `gist`) reached only through `@import(...)` — a file import
+// cannot cross a package boundary — so the whole package is a thin face, a
+// thin FFI, and a correspondingly small contract. Judged by `ward verify`.
 
 package blast {
-    // main.zig is the exe root: it drives gist's manifest over the local
-    // repertoire, which dispatches the two verb files.
+    // The face is the exe facade. `exports.zig` under ffi is a second root —
+    // the `libblast` artifact's — and is deliberately not reachable from the
+    // face, so its `export fn`s are emitted once by the library named after
+    // them rather than by every compilation that imports a shared module.
     root   src
-    facade surface/face/irregex/main.zig
+    facade surface/face/blast/main.zig
 }
 
-// One tier — the face itself. The laws that matter here are the always-on
-// ones: no import may climb out of the module root (the engines are named
-// modules, never `../../` reaches into a sibling checkout), and no cycles.
+// Tiers, low to high. An import may only point back up the page.
 tiers {
+    // C-ABI producer — `blast_run` over the four composed verbs. Declines
+    // in-process today (`.stale` → CLI fallback); the point of the tier is
+    // that a host links `libblast` for compose and `librelate` for kinship,
+    // never one library for both. Sits below the face so the face never
+    // reaches into the ABI shims. No `keep` on this tier: like irregex's
+    // ffi, the export root is entered by the build graph, not by a peer.
+    ffi     surface/ffi/**
+
+    // The thin product face. Drivers for `blast` and `provenance` plus the
+    // repertoire the manifest renders. Imports the engines as named modules;
+    // never climbs out of this package with a file import.
     face    surface/face/**
 }
+
+// Guest lists: regions only the named importers may reach at all.
+
+// The face is this package's one product surface for Zig. Nothing else in
+// the tree reaches into it.
+keep surface/face/** to surface/face/blast/main.zig
 
 // Structural laws.
 limit  reach to 2 hops
