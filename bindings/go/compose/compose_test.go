@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/The-Billy-Company/irregex/bindings/go/analytic"
-	"github.com/The-Billy-Company/irregex/bindings/go/runtime"
 )
 
 // planted is a corpus whose composed answers are known in advance: the two twins
@@ -35,13 +34,6 @@ func planted(t *testing.T) *Corpus {
 		}
 	}
 	return Over(root).In(root)
-}
-
-func requireEngine(t *testing.T, tool string) {
-	t.Helper()
-	if _, err := runtime.Binary(tool); err != nil {
-		t.Skipf("no %s binary: %v", tool, err)
-	}
 }
 
 // TestScopeIsMandatory pins the containment rule: a composed query with no scope
@@ -84,16 +76,25 @@ func TestComposedVerbsNeedTheirSubject(t *testing.T) {
 // admits the candidate set, and the compression engine may only pick inside it.
 // Every pick is re-checked by reading the file, so the containment claim is proven
 // against bytes rather than taken from the engine's own report. It runs over the
-// kernel's own tree because pricing a query needs a corpus with a lexicon — a
+// engine's own source because pricing a query needs a corpus with a lexicon — a
 // three-file fixture has too few phrases for a composed pack to price at all.
 func TestContextPicksOnlyMatchingFiles(t *testing.T) {
-	requireEngine(t, runtime.ToolRelate)
 	repo := checkout(t)
-	const pattern = "resident"
-	scope := kernelScope(t, repo)
+	const pattern = "compose"
+	scope := engineScope(t, repo)
+	// Both halves of this test have to be able to fail, and one of them silently
+	// stopped being able to. Containment is only an assertion while the pattern
+	// also matches files the scope excludes; when it matches nothing outside,
+	// "every pick was in scope" is true of any answer whatsoever. That is not a
+	// hypothetical — this scope was a nested directory in the tree this package
+	// was extracted from and became the whole repository, so the check went quiet
+	// without going red. Prove the trap is still armed before trusting it.
+	if outside := matching(t, repo, pattern) - matching(t, filepath.Join(repo, scope), pattern); outside == 0 {
+		t.Fatalf("%q matches nothing outside %s: scope containment cannot fail here", pattern, scope)
+	}
 	picks, err := Over(scope).In(repo).
 		Context(t.Context(), analytic.Compose{
-			Text:     "how does the resident session reconcile freshness",
+			Text:     "what does the compose verb do and how does it narrow",
 			Patterns: []string{pattern},
 			Top:      4,
 		})
@@ -124,7 +125,6 @@ func TestContextPicksOnlyMatchingFiles(t *testing.T) {
 // TestFamilyNarrowsToMatching pins the other composition: fork families computed
 // only among the files the pattern admitted.
 func TestFamilyNarrowsToMatching(t *testing.T) {
-	requireEngine(t, runtime.ToolRelate)
 	families, err := planted(t).Family(t.Context(), analytic.Compose{
 		Patterns:    []string{"Reticulate"},
 		MaxDistance: ptr(0.6),
@@ -150,7 +150,6 @@ func TestFamilyNarrowsToMatching(t *testing.T) {
 // recorded answer: the definition site must be the file that declares it, and the
 // dependents must include a use that is not the definition.
 func TestBlastReadsCurrentBytes(t *testing.T) {
-	requireEngine(t, runtime.ToolBlast)
 	repo := checkout(t)
 	blast, err := Over(bindingScope(t, repo)).In(repo).
 		Blast(t.Context(), analytic.Compose{Text: "ErrUnscoped", Budget: 64})
@@ -183,39 +182,53 @@ func TestBlastReadsCurrentBytes(t *testing.T) {
 	}
 }
 
-// kernelScope is the kernel package this binding ships inside, named relative to
-// the checkout: the nearest ancestor holding a `build.zig`. The extracted repo
-// keeps that at the root and the monorepo it was split out of nests it under
-// `libs/kernels/irregex`, so a scope spelling either layout literally searches
-// nothing at all in the other — and an empty scope reads as "no matches" rather
-// than as a broken test.
-func kernelScope(t *testing.T, repo string) string {
+// engineScope is the composed face's own Zig source, named relative to the
+// checkout. It is deliberately a fixed subdirectory rather than "wherever
+// `build.zig` lives": that spelling resolved to a nested package in the tree this
+// was extracted from and to the repository root here, and a scope equal to the
+// root is not a scope — it excludes nothing, so nothing can be caught escaping it.
+func engineScope(t *testing.T, repo string) string {
 	t.Helper()
-	return relTo(t, repo, ancestorWith(t, "build.zig"))
+	src := filepath.Join(repo, "src")
+	if _, err := os.Stat(src); err != nil {
+		t.Fatalf("no engine source at %s: %v", src, err)
+	}
+	return relTo(t, repo, src)
+}
+
+// matching counts files under root whose bytes contain pattern. Deliberately a
+// plain walk rather than a call into the search engine: it is used to prove the
+// assertion above is falsifiable, and evidence about a tool should not be
+// gathered with that tool.
+func matching(t *testing.T, root, pattern string) int {
+	t.Helper()
+	n := 0
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		switch {
+		case err != nil:
+			return err
+		case d.IsDir():
+			if name := d.Name(); name == ".git" || name == "zig-out" || strings.HasSuffix(name, "zig-cache") {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		body, err := os.ReadFile(path)
+		if err == nil && strings.Contains(string(body), pattern) {
+			n++
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walk %s: %v", root, err)
+	}
+	return n
 }
 
 // bindingScope is this binding's own directory, where the blast target is declared.
 func bindingScope(t *testing.T, repo string) string {
 	t.Helper()
 	return relTo(t, repo, filepath.Dir(cwd(t))) // .../bindings/go/compose → .../bindings/go
-}
-
-// ancestorWith climbs from the working directory to the nearest dir holding marker.
-func ancestorWith(t *testing.T, marker string) string {
-	t.Helper()
-	dir := cwd(t)
-	for range 16 {
-		if _, err := os.Stat(filepath.Join(dir, marker)); err == nil {
-			return dir
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
-	}
-	t.Fatalf("no ancestor of %s holds %s", cwd(t), marker)
-	return ""
 }
 
 func relTo(t *testing.T, base, dir string) string {
