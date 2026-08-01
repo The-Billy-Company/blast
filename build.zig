@@ -15,7 +15,7 @@ const builtin = @import("builtin");
 
 pub fn build(b: *std.Build) void {
     // macOS deployment floor: below any plausible consumer link target
-    // (kernelkit's convention, matching the sibling packages).
+    // (matching the sibling packages).
     const default_target: std.Target.Query = if (builtin.target.os.tag == .macos)
         .{ .os_version_min = .{ .semver = .{ .major = 13, .minor = 0, .patch = 0 } } }
     else
