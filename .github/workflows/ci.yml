@@ -1,0 +1,319 @@
+# What has to be true before a change lands.
+#
+# Four faces plus a formatter gate, five jobs, deliberately not one: a Zig
+# engine regression and a Rust clippy nit are different news, and a single job
+# would report them as the same red X. What blast adds over the packages it
+# composes is the first step of almost every job below — blast contains neither
+# engine, so CI has to assemble the ecosystem on disk before anything here can
+# even configure. The two jobs that need no ecosystem, `rust` and `fmt`, say so
+# by checking out less.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A force-push mid-run should cancel the run it obsoleted, not race it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  ZIG_VERSION: 0.16.0
+
+jobs:
+  engine:
+    # Both host families, because the build branches on them: macOS re-archives
+    # through `libtool` for ld64's alignment rules, and the composed face links
+    # a dylib against the substrate's, which is a different loader on each.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: blast
+    steps:
+      # ── the sibling problem, and why the checkout looks like this ──
+      #
+      # blast has the only two-level path graph in the ecosystem. Its own
+      # build.zig.zon points at ../irregex and ../relate; relate's build.zig.zon
+      # then points at ../irregex and ../gist of its own; and build.zig installs
+      # ../gist/include/gist.h beside its header, because the C ABI names
+      # gist_engine even though blast takes no Zig module dep on gist. So a bare
+      # clone cannot configure, and a naive fix that adds relate alone still
+      # cannot: relate would arrive looking for siblings nobody fetched.
+      #
+      # actions/checkout refuses any path outside the workspace, so `path: ../…`
+      # is not on the table. The fix is to move the whole layout down one level:
+      # this repository lands in blast/ rather than at the root, and the three
+      # packages it needs land beside it —
+      #
+      #   $GITHUB_WORKSPACE/{blast,irregex,relate,gist}
+      #
+      # — which is exactly the flat arrangement every repo in the ecosystem
+      # already assumes, so both levels resolve for the same reason: blast finds
+      # ../irregex and ../relate, and relate finds the ../irregex and ../gist
+      # beside itself. The bindings agree one level deeper (they reach
+      # ../../../<sibling>/bindings/<lang>), so the same checkout serves every
+      # job here. It is also the layout a developer already has on disk, which is
+      # the point: CI resolves these the way a laptop does, not a special way.
+      #
+      # Siblings track their default branch on purpose. Path deps mean blast is
+      # judged against the tip of what it composes; a release pins url+hash
+      # instead, and that is the day this stops being a checkout problem.
+      #
+      # `relate` is not a public repository, so the default GITHUB_TOKEN cannot
+      # read it. ECOSYSTEM_TOKEN is a secret with read access to it; the
+      # fallback keeps the two public packages fetchable without one, so a fork
+      # gets three of four repos and a legible failure rather than a mystery.
+      - uses: actions/checkout@v4
+        with:
+          path: blast
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/irregex
+          path: irregex
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/relate
+          path: relate
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/gist
+          path: gist
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
+      # Compile-only first: when this fails, the test log below is noise, and
+      # the failure is one line rather than a suite's worth of scrollback.
+      - run: zig build check
+      - run: zig build test
+      # The default install step, which `check` and `test` both skip: it is the
+      # only rung that runs the macOS libtool re-archive, links libblast against
+      # libirregex, and stages the three headers. Those are the artifact a
+      # consumer receives, and macOS is the half of this matrix that has its own
+      # code path through them.
+      - run: zig build --summary none
+      # `zig build coverage` is deliberately absent: it shells kcov, which is on
+      # neither runner image, and installing it would buy a number nothing here
+      # gates on. It stays a local instrument.
+
+  python:
+    # Three interpreters in one job rather than a matrix over three runners.
+    # This suite cannot skip its way to green — the composed verbs answer through
+    # real `blast`, `relate`, and `gist` binaries, and the packaging tests load
+    # real libraries — so every leg would pay for a full ecosystem build, three
+    # times, to prove something that is only ever interpreter-level. One build,
+    # three steps: a version that breaks still names itself in the log.
+    #
+    # 3.12 is the declared floor (`requires-python = ">=3.12"`, tracking the
+    # irregex substrate) and there is no upper pin, so the top of the range is
+    # tested rather than assumed — a published library has no business refusing
+    # next year's interpreter, and the way to keep that true is to notice.
+    runs-on: ubuntu-latest
+    steps:
+      # Same four-repo layout as the engine job; see the comment there.
+      - uses: actions/checkout@v4
+        with:
+          path: blast
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/irregex
+          path: irregex
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/relate
+          path: relate
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/gist
+          path: gist
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
+      # Without this the whole suite skips itself and reports green over nothing:
+      # every composed test is guarded on a resolvable binary, and the packaging
+      # pair is guarded on a built library. Each package is built in its own
+      # checkout because that is where the bindings look — the resolver walks to
+      # the checkout that owns a name and reads its zig-out/, so `gist` comes
+      # from gist/, `relate` from relate/, libirregex from irregex/, and blast's
+      # own binary and dylib from here. (It would otherwise build them itself,
+      # mid-test, inside a 600 s timeout; better to pay it once, in the open.)
+      - name: Build the binaries and libraries the suite drives
+        run: |
+          for package in irregex gist relate blast; do
+            ( cd "$package" && zig build --summary none )
+          done
+      - uses: astral-sh/setup-uv@v5
+      - name: pytest on 3.12 (the declared floor)
+        working-directory: blast/bindings/python
+        run: uv run --python 3.12 pytest -q
+      - name: pytest on 3.13
+        working-directory: blast/bindings/python
+        run: uv run --python 3.13 pytest -q
+      - name: pytest on 3.14
+        working-directory: blast/bindings/python
+        run: uv run --python 3.14 pytest -q
+
+  go:
+    # The Go module is pure Go by default (the in-process tier is behind
+    # `-tags irregex_ffi`), so nothing here needs cgo or a prebuilt archive.
+    # Both engines are still built, because the composed verbs answer through
+    # them: without a reachable binary those tests skip, and a job that vets a
+    # module without running its subject is a green tick over an untested seam.
+    #
+    # Building them is now the whole job. The resolver reads the env override,
+    # then a built zig-out/bin/<name> up the tree, then the sibling checkout
+    # that owns the name, then PATH — and the four-repo layout above is exactly
+    # what the sibling rung is describing, so `blast` comes from blast/ and
+    # `relate` from relate/ with nothing exported. The PATH export this job used
+    # to carry was covering for a rung that pointed into the monorepo these
+    # packages were extracted from; it resolved nothing here and hid the gap.
+    #
+    # The step below asserts no test skipped itself, which is the thing PATH was
+    # really insuring against — and unlike PATH it fails loudly instead of
+    # quietly papering over a resolver that stopped working.
+    runs-on: ubuntu-latest
+    steps:
+      # Same four-repo layout as the engine job; see the comment there. gist is
+      # needed even though no Go code touches it: relate's package graph and
+      # blast's header install both reach for it.
+      - uses: actions/checkout@v4
+        with:
+          path: blast
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/irregex
+          path: irregex
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/relate
+          path: relate
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/gist
+          path: gist
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
+      - run: zig build --summary none
+        working-directory: blast
+      - run: zig build --summary none
+        working-directory: relate
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: blast/bindings/go/go.mod
+      - run: go vet ./...
+        working-directory: blast/bindings/go
+      - name: go test, and prove no test skipped itself
+        working-directory: blast/bindings/go
+        run: |
+          set -o pipefail
+          go test -v ./... 2>&1 | tee "$RUNNER_TEMP/go-test.log"
+          if grep -q -- '--- SKIP' "$RUNNER_TEMP/go-test.log"; then
+            echo "::error::a test skipped itself — an engine binary did not resolve"
+            exit 1
+          fi
+
+  rust:
+    # The only job that needs no Zig and no ecosystem build. This crate is a
+    # subprocess face — its vendor/ carries no archive of its own — and its tests
+    # are builder smoke: they prove a composed request lowers into an argv and
+    # that a missing scope is a typed refusal, neither of which opens a binary.
+    # The irregex checkout is here for the path dependency alone; the archive
+    # cargo links comes prebuilt in that repo.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: blast/bindings/rust
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: blast
+      - uses: actions/checkout@v4
+        with:
+          repository: The-Billy-Company/irregex
+          path: irregex
+          token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
+      # rust-toolchain.toml pins the channel; installing it explicitly would
+      # override the pin the repository already made.
+      - run: rustup show
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+
+  fmt:
+    # Zig was the one language here whose formatter nothing checked, while Rust
+    # got `cargo fmt --check` in the job above. That gap is not academic: `zig
+    # fmt` pads a column-aligned multiline literal into a grid, so a rename that
+    # shrinks the widest cell leaves every row beneath it one space too wide, in
+    # files nobody touched. Drift like that wants a red X that says "formatting",
+    # not one buried in a build log. blast owns few enough Zig files that a gate
+    # sounds like overkill, which is exactly the size of tree where drift sits
+    # unnoticed the longest.
+    #
+    # Its own job for the same reason the other four are separate, and the
+    # cheapest one here by a distance — the single checkout below is the whole
+    # setup, because reading files is not configuring a build and none of the
+    # two-level path dependencies apply. Even `rust`, the other job that skips
+    # the ecosystem, still needs irregex on disk for a path dependency; this one
+    # needs nothing. So there is no `path:` and no `working-directory`: the
+    # repository is the workspace, which is what makes `git ls-files` mean this
+    # repository rather than whichever sibling landed first.
+    #
+    # Pinned to the ZIG_VERSION everything else builds with, because the
+    # formatter's output is a property of the compiler release — checking against
+    # a different Zig would be checking against a different grid.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
+      - name: zig fmt --check
+        run: |
+          set -euo pipefail
+          # Enumerated rather than spelled out as a path list, because a path
+          # list drifts the same silent way the formatting does — it goes stale
+          # the moment a directory is added or renamed, and stale in the
+          # direction that checks less. That matters more here than the current
+          # file count suggests: blast's Zig lives entirely under one subtree
+          # today, and a path list would quietly stop covering the day it does
+          # not.
+          #
+          # Tracked plus untracked-not-ignored is every Zig file this repository
+          # owns. What that leaves out is exactly the ignored trees — `.zig-cache`
+          # and the fetched `zig-pkg/`, which parks a whole `build.zig` of its
+          # own — so the exclusions are named in `.gitignore` and reviewable
+          # there, rather than being whatever happened to fall outside an
+          # argument list.
+          #
+          # The existence test is for a working tree mid-edit, where the index
+          # can still name a file someone has deleted; CI's checkout never has
+          # one, and a stale index should not read as a formatting failure.
+          files=()
+          while IFS= read -r f; do
+            if [ -f "$f" ]; then files+=("$f"); fi
+          done < <(git ls-files -co --exclude-standard '*.zig')
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::found no .zig files — the enumeration is broken, not the tree" >&2
+            exit 1
+          fi
+          echo "checking ${#files[@]} files"
+          zig fmt --check "${files[@]}"
