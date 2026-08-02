@@ -59,6 +59,22 @@ actually clone.
 | the Go binding | Go | `bindings/go/go.mod` |
 | coverage | kcov | only for `zig build coverage`, a local instrument |
 
+If you run [mise](https://mise.jdx.dev), that table is one command:
+
+```bash
+mise install
+```
+
+`.mise.toml` pins every row at the version CI uses and `mise.lock` carries the
+checksums for all four release platforms. The pins are mirrors of the files in
+the third column and never the authority, so bumping one means bumping the
+other in the same commit. kcov is the exception and stays a `brew install`: it
+backs a local instrument nothing gates on, and there is no package to pin.
+
+What no lockfile can install is the siblings. blast is the composed face and
+builds against `irregex` and `relate` checked out beside this repo - versions
+are a package manager's job, a checkout is not.
+
 ```bash
 zig build                 # ReleaseFast blast → zig-out/bin/blast, plus libblast
 zig build check           # compile only - the fastest "did I break it"
