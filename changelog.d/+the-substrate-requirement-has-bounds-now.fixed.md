@@ -1,0 +1,3 @@
+The declared dependencies carry bounds: `irregex>=1.0.0,<2` and `relate-search>=0.1.0,<2`.
+
+Unbounded, the substrate requirement resolves to `irregex==0.1.0` - the pre-rename placeholder on the index, which has no `irgx` module in it at all, so an install would succeed and then fail on the first import. The floor is 1.0.0 because that is where `irgx` starts existing; the ceiling is the same fact from the other side, since 1.0.0 is where the substrate froze the C ABI and the `irgx` surface and a 2.0 is free to move both. blast composes relate's kinship verbs across the same kind of boundary, so that requirement is bounded for the same reason, at its own version.
