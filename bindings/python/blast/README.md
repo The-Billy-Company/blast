@@ -1,11 +1,3 @@
----
-doc_radar:
-  sentinels:
-    - file: ../../../contract/compose.toml
-      contains: ["[compose.verbs]"]
-      description: The composed verbs stay with the product that answers them.
----
-
 # `blast` — composed verbs
 
 Exact match narrows a candidate set; compression reasons inside it. The two

@@ -1,20 +1,3 @@
-<!--
-doc_radar:
-  sentinels:
-    - file: compose.go
-      contains:
-        - "func Over(roots ...string) *Corpus"
-        - "func (c *Corpus) All() *Corpus"
-        - "func (c *Corpus) Context(ctx context.Context, p analytic.Compose) ([]relate.Pick, error)"
-        - "func (c *Corpus) Family(ctx context.Context, p analytic.Compose) ([]relate.Family, error)"
-        - "func (c *Corpus) Provenance(ctx context.Context, p analytic.Compose) ([]Attribution, error)"
-        - "func (c *Corpus) Blast(ctx context.Context, p analytic.Compose) (Blast, error)"
-        - "var ErrUnscoped"
-    - file: ../../../contract/compose.toml
-      contains:
-        - "[compose.verbs]"
--->
-
 # `compose` — both engines at once
 
 Go binding for [blast](../../../README.md)'s composed verbs. The pattern set

@@ -1,14 +1,3 @@
----
-doc_radar:
-  sentinels:
-    - description: "blast exposes the composed verbs"
-      file: bindings/rust/src/lib.rs
-      contains: ["pub fn provenance", "pub fn blast", "pub fn context", "pub fn family"]
-    - description: "blast depends on the irregex substrate"
-      file: bindings/rust/Cargo.toml
-      contains: ["irregex ="]
----
-
 # blast — composed verbs
 
 The Rust face of the `blast` package. Exact narrows, compression reasons inside

@@ -1,11 +1,3 @@
-<!--
-doc_radar:
-  counts:
-    - glob: "bindings/go/*/"
-      equals: 1
-      unit: dirs
--->
-
 # `bindings/go/`
 
 Go binding for [blast](../../README.md) — what moves if I change this. The

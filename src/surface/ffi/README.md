@@ -1,14 +1,3 @@
----
-doc_radar:
-  sentinels:
-    - description: "C ABI producer exports live in the artifact root"
-      file: src/surface/ffi/exports.zig
-      contains: ["export fn blast_run"]
-    - description: "public header declares blast_run and includes the substrate"
-      file: include/blast.h
-      contains: ["int32_t blast_run(", "#include <gist.h>", "#include <irgx.h>"]
----
-
 # surface/ffi — in-process C-ABI compose producer
 
 `blast_run` materializes a composed answer (`context` · `family` ·
