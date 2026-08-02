@@ -1,0 +1,33 @@
+# Blank issues are off, not to be difficult, but because the forms beside this
+# file ask for the things that decide whether a report is actionable: the exact
+# command line, a tree we can rebuild, and which of the four packages was on
+# disk. This face composes three others, so "it returned the wrong thing"
+# without those is a report nobody can place, let alone reproduce.
+blank_issues_enabled: false
+
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/The-Billy-Company/blast/security/advisories/new
+    about: >-
+      Never in a public issue. This opens a private thread only the maintainers
+      can read. SECURITY.md says what counts here - a phrase that outlives its
+      bytes, or a radius that hides a real dependent, is a security question
+      rather than a bug.
+
+  - name: The kinship distance itself looks wrong
+    url: https://github.com/The-Billy-Company/relate/issues/new/choose
+    about: >-
+      Sketches, grades, families, and the codex shelf belong to the compression
+      engine. This repository owns what the composed verbs do with them.
+
+  - name: A pattern matched the wrong thing
+    url: https://github.com/The-Billy-Company/irregex/issues/new/choose
+    about: >-
+      Spans, anchors, Unicode, case folding, and engine semantics belong to the
+      engine repository.
+
+  - name: Exact search, the daemon, or the answer keep
+    url: https://github.com/The-Billy-Company/gist/issues/new/choose
+    about: >-
+      `gist` is the exact-search face and the chassis this binary is built on:
+      argv, the resident session, the answer keep.

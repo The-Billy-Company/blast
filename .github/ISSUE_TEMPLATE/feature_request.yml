@@ -1,0 +1,71 @@
+name: Feature request
+description: Something the composed face should be able to do and cannot.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        This face keeps exactly the questions that need **current bytes** rather
+        than a narrowing. Composition-as-narrowing already left: the old
+        `context` and `family` verbs became `relate pack --matching` and
+        `relate echoes --matching`, where they combine with every other axis
+        those verbs have - which the fixed verbs here never could.
+
+
+        So the useful version of this request answers: why does this need to
+        read the tree as it is right now, instead of being a flag on a relate
+        verb?
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you are trying to do
+      description: >-
+        The question you are asking of a codebase, not the flag you have in
+        mind. "Before I rename this, what breaks?" is the kind of question that
+        produced both verbs here.
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What you do instead today
+      description: >-
+        The pipeline you assemble, the second tool you reach for, the loop you
+        write. This is the strongest evidence a request has.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+      description: >-
+        A field, a flag, an output shape. Rough is fine. If you know what it
+        should do at the edges - nothing found, a symbol with a thousand
+        callers, a `--budget` that has to trim something - say it, because that
+        is where the design work actually is.
+
+  - type: dropdown
+    id: home
+    attributes:
+      label: Where does this belong?
+      options:
+        - Here - it needs current bytes, not a precomputed answer
+        - "`relate` - it is a narrowing, so it is a `--matching` flag"
+        - "`gist` - it is exact search"
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: prior_art
+    attributes:
+      label: Who already does this?
+      description: >-
+        An LSP, a call-graph tool, a code-owners heuristic, a paper. Not a
+        disqualification - the opposite. Knowing that someone solved it, and
+        how, is where a good design starts, and we would rather adopt a good
+        idea with credit than reinvent a worse one.

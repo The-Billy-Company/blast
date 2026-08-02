@@ -1,0 +1,35 @@
+# Automated dependency updates.
+#
+# One ecosystem, and the omissions are the interesting part.
+#
+# The three bindings each resolve their siblings as PATH dependencies - the Go
+# `replace`, the uv sources, and the Rust path dep all spell
+# `../../../irregex/...`. Dependabot runs each update in a sandbox holding only
+# this repository, where those paths do not exist, so a `cargo` / `gomod` / `uv`
+# entry here would not produce careful pull requests: it would produce a
+# recurring resolution error against a manifest that is correct. This package's
+# real third-party surface is the smallest in the ecosystem - it composes two
+# engines and bundles nothing - and what it does depend on moves when they do,
+# which Dependabot DOES watch, in the repositories that can resolve it.
+#
+# Zig is absent because Dependabot has no Zig ecosystem, and because this
+# package's only dependencies are those same siblings.
+#
+# That leaves the one thing here nothing else watches, and the one most worth
+# watching: a compromised action is the supply-chain hole that runs with the
+# repository's own token - and the workflows here hold a token that can read
+# three sibling repositories.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+    labels: ["dependencies", "ci"]

@@ -1,0 +1,26 @@
+# Who gets asked to review what.
+#
+# GitHub matches the LAST rule that applies to a file, so the specific rules
+# live below the catch-all. Ownership here is a routing table, not a fence: a
+# pull request from anyone is welcome on any of these paths.
+
+*                       @GriffinCanCode
+
+# The face and the FFI producer - two verbs and the shims that export them.
+/src/                   @GriffinCanCode
+
+# The two contracts. `blast.ward` is the import topology - two hops of reach,
+# and no more; `compose.toml` declares the seam, including the rule that exact
+# and statistical scores never fuse into one number.
+/contract/              @GriffinCanCode
+
+# The C ABI a host links against.
+/include/               @GriffinCanCode
+
+/NOTICE                 @GriffinCanCode
+/LICENSE                @GriffinCanCode
+
+# Anything that can change what CI proves, including this file. CI here also
+# assembles four repositories before it can configure, so a change to a
+# workflow is a change to what "the ecosystem" means on a runner.
+/.github/               @GriffinCanCode

@@ -1,0 +1,87 @@
+name: Bug report
+description: A crash, a hang, a build or link failure, a broken flag.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        If the complaint is that an answer is *wrong* rather than broken - a
+        missing dependent, a misattributed phrase - the other form asks better
+        questions than this one; use that instead.
+
+
+        Most build failures here are the sibling layout. This package has the
+        only two-level path graph in the ecosystem and needs all four checkouts
+        beside each other; CONTRIBUTING.md has the diagram.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce it
+      description: >-
+        The command line exactly as run, and the shell that builds the corpus
+        if the tree matters. A reproduction we can paste into a terminal is
+        worth ten paragraphs of description.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output, error, or stack trace
+      description: >-
+        The whole thing, not the last line - stderr included.
+      render: text
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does it happen?
+      options:
+        - running a verb (`blast`, `provenance`)
+        - resolving an engine binary or a sibling checkout
+        - build or link (`zig build`, `libblast` against `libirgx`)
+        - the C ABI (`blast_run`, the staged headers)
+        - one of the bindings (Python / Rust / Go)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: "`blast --version`"
+      description: Or the commit SHA if you built it yourself.
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      description: >-
+        OS, architecture, Zig version, and the optimize mode. Releases are
+        `ReleaseFast`, where Zig's safety checks are off, so the mode changes
+        what a bug looks like.
+      placeholder: "Ubuntu 24.04 x86_64, Zig 0.16.0, ReleaseFast"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: tried
+    attributes:
+      label: Worth trying first
+      description: Not required, but each one narrows the search considerably.
+      options:
+        - label: "All four checkouts are present as siblings and current"
+        - label: "`zig build` succeeds in each of irregex, gist, relate, blast"
+        - label: "`GIST_NO_KEEP=1` changes nothing (so it is not a recalled answer)"

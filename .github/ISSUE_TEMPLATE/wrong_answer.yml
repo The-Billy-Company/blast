@@ -1,0 +1,98 @@
+name: Wrong radius or provenance
+description: blast missed something it should have found, or claimed something untrue.
+title: "answer: "
+labels: ["answer"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        These two verbs are used to decide things - whether an edit is safe,
+        where a passage came from - so a wrong answer matters more than a slow
+        one. This is the form for that.
+
+
+        If a hostile repository could produce what you saw, or if the missing
+        dependent could be made to disappear on purpose, treat it as a security
+        report and file it privately:
+        [SECURITY.md](https://github.com/The-Billy-Company/blast/blob/main/SECURITY.md).
+
+  - type: dropdown
+    id: verb
+    attributes:
+      label: Which verb
+      options:
+        - "`blast` - the live blast radius"
+        - "`provenance` - quotation re-verified against current bytes"
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: The command
+      description: Exactly as run, from the directory it was run in.
+      render: shell
+      placeholder: |
+        blast blast Corpus --json
+    validations:
+      required: true
+
+  - type: textarea
+    id: corpus
+    attributes:
+      label: The corpus
+      description: >-
+        A few lines of shell that build a tree showing the problem, or the
+        public repository and commit you ran against. Two small files that
+        reproduce it beat a description of a repository we cannot open.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it returned, and what it should have
+      description: >-
+        The output, and then the specific thing that is wrong - the caller that
+        is missing, the phrase attributed to the wrong file, the definition that
+        lost to a mention. Name it; "the radius looks incomplete" is not
+        something we can chase.
+      render: text
+    validations:
+      required: true
+
+  - type: dropdown
+    id: budget
+    attributes:
+      label: Was anything omitted for budget?
+      description: >-
+        `--budget N` trims the low-priority tail into `stats.omitted`. If the
+        thing you expected is in there, the report is about priority rather
+        than about a miss - which is still worth filing, and is a different fix.
+      options:
+        - "No - `stats.omitted` is empty or does not contain it"
+        - "Yes - it was omitted for budget"
+        - "I did not check"
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: >-
+        `blast --version`, and the versions or commits of the packages you built
+        against - this face composes three of them.
+      placeholder: "blast 0.1.0, built against irregex/relate/gist at <sha>"
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      description: OS, architecture, and the optimize mode you built with.
+      placeholder: "macOS 15 arm64, Zig 0.16.0, ReleaseFast"
+    validations:
+      required: true
