@@ -16,14 +16,68 @@
 
 [project]
 name = "blast-search"
-version = "0.1.0" # x-release-please-version
-description = "Importable Python API for blast composed search verbs."
+version = "0.1.0"                                                                                                                                                                   # x-release-please-version
+description = "Blast-radius and provenance analysis for Python - what breaks if I change this symbol, and where a pasted snippet came from, read from the bytes on disk right now."
+readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"
+authors = [ { name = "The Billy Company" } ]
+# Two questions, two vocabularies. "What breaks if I change this" is searched
+# as blast radius / impact analysis / find references / change impact; "where
+# is this text from" is searched as provenance / attribution / plagiarism.
+# Neither audience knows the word "composed verbs", so it is not here.
+keywords = [
+  "blast-radius",
+  "impact-analysis",
+  "change-impact-analysis",
+  "code-impact",
+  "find-references",
+  "call-graph",
+  "dependency-analysis",
+  "code-navigation",
+  "refactoring",
+  "codebase-analysis",
+  "static-analysis",
+  "provenance",
+  "code-attribution",
+  "attribution",
+  "plagiarism-detection",
+  "code-search",
+  "cross-reference",
+  "symbol-search",
+  "developer-tools",
+  "agent-tools",
+]
 dependencies = [
   "irregex",
   "relate-search",
 ]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Zig",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Text Processing",
+  "Topic :: Text Processing :: Indexing",
+  "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/The-Billy-Company/blast"
+Documentation = "https://github.com/The-Billy-Company/blast#readme"
+Repository = "https://github.com/The-Billy-Company/blast"
+Issues = "https://github.com/The-Billy-Company/blast/issues"
+Changelog = "https://github.com/The-Billy-Company/blast/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = [ "hatchling" ]
@@ -42,7 +96,7 @@ dev = [
   "pytest>=9.0",
   "ruff>=0.15",
   # distribution `gist-search`, import `gist` — the bare name was taken on PyPI.
-  "gist-search",  # oracle face for exact-search checks in behavioral tests
+  "gist-search", # oracle face for exact-search checks in behavioral tests
 ]
 
 [tool.pytest.ini_options]
@@ -52,8 +106,8 @@ testpaths = [ "tests" ]
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
-ignore = ["E501"]
+select = [ "E", "F", "I", "UP", "B", "SIM" ]
+ignore = [ "E501" ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["blast", "relate", "irgx", "gist"]
+known-first-party = [ "blast", "relate", "irgx", "gist" ]

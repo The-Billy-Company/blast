@@ -4,11 +4,20 @@
 
 [package]
 name = "blast"
-version = "0.1.0" # x-release-please-version
+version = "0.1.0"                                                                                                                                                                 # x-release-please-version
 edition = "2024"
 rust-version = "1.85"
 license = "Apache-2.0"
-description = "Importable Rust face of the blast composed verbs (provenance, blast radius)."
+description = "Blast-radius and provenance analysis for Rust - what breaks if I change this symbol, and where a pasted snippet came from, read from the bytes on disk right now."
+readme = "README.md"
+homepage = "https://github.com/The-Billy-Company/blast"
+repository = "https://github.com/The-Billy-Company/blast"
+documentation = "https://github.com/The-Billy-Company/blast/blob/main/bindings/rust/README.md"
+authors = [ "The Billy Company" ]
+# "composed verbs" is how this crate is built, not what it is for. The five
+# slots go to the two questions it answers, in the words they get asked in.
+keywords = [ "blast-radius", "impact-analysis", "refactoring", "code-search", "provenance" ]
+categories = [ "development-tools", "text-processing", "api-bindings", "algorithms" ]
 publish = false
 
 exclude = [ "/target", "/.cargo" ]

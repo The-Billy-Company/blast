@@ -1,4 +1,7 @@
-# blast
+# blast: blast radius and provenance for a codebase
+
+What breaks if I change this symbol, and where did this pasted text come from -
+both answered from the bytes on disk right now, with no precomputed graph.
 
 The composed face - the two questions that need BOTH engines and CURRENT
 bytes. The package is named `blast` and so is the binary. The `irregex`
