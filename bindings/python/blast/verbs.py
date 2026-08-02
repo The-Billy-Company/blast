@@ -34,9 +34,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from irregex.contract.table import verb_schema
-from irregex.runtime import analytic, cold
-from irregex.runtime.decode import bind
+from irgx.contract.table import verb_schema
+from irgx.runtime import analytic, cold
+from irgx.runtime.decode import bind
 from relate.corpus import CORPUS_TIMEOUT
 
 if TYPE_CHECKING:

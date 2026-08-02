@@ -4,9 +4,9 @@
 
 use std::path::PathBuf;
 
-use irregex::contract::schema::VERBS;
-use irregex::runtime::relay::{Bin, Invocation, Shape};
-use irregex::runtime::{Error, Query, Result, Rows, Wire, answer, struct_size, sys};
+use irgx::contract::schema::VERBS;
+use irgx::runtime::relay::{Bin, Invocation, Shape};
+use irgx::runtime::{Error, Query, Result, Rows, Wire, answer, struct_size, sys};
 
 /// A composed question: an exact pattern set plus the text to reason about.
 #[derive(Debug, Clone)]
@@ -98,7 +98,7 @@ impl Composed {
     }
 
     /// Soft token cap for [`blast`](super::blast). What it trims is reported in
-    /// [`Stats::omitted`](irregex::runtime::Stats::omitted), not silently dropped.
+    /// [`Stats::omitted`](irgx::runtime::Stats::omitted), not silently dropped.
     #[must_use]
     pub fn budget(mut self, n: u32) -> Self {
         self.budget = n;

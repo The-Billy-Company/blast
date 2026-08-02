@@ -6,13 +6,13 @@ doc_radar:
       contains: ["export fn blast_run"]
     - description: "public header declares blast_run and includes the substrate"
       file: include/blast.h
-      contains: ["int32_t blast_run(", "#include <gist.h>", "#include <irregex.h>"]
+      contains: ["int32_t blast_run(", "#include <gist.h>", "#include <irgx.h>"]
 ---
 
 # surface/ffi — in-process C-ABI compose producer
 
 `blast_run` materializes a composed answer (`context` · `family` ·
-`provenance` · `blast`) into an `irregex_rows *` walked by `libirregex`.
+`provenance` · `blast`) into an `irgx_rows *` walked by `libirgx`.
 Every verb declines in-process today (`.stale` → CLI fallback); the point of
 the seam is that a host links `libblast` for compose and `librelate` for
 kinship, never one library for both.
@@ -21,8 +21,8 @@ kinship, never one library for both.
 
 | Symbol | Role |
 | --- | --- |
-| `blast_run(engine, op, params, cancel, out)` | materialize one verb into an `irregex_rows *` |
-| `irregex_rows_next` / `_next_batch` / `_stats` / `_close` | walk that cursor (`libirregex`) |
+| `blast_run(engine, op, params, cancel, out)` | materialize one verb into an `irgx_rows *` |
+| `irgx_rows_next` / `_next_batch` / `_stats` / `_close` | walk that cursor (`libirgx`) |
 
 ### Files
 

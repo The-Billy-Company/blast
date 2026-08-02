@@ -3,17 +3,17 @@ revision = 3
 requires-python = ">=3.12"
 
 [[package]]
-name = "blast"
+name = "blast-search"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "irregex" },
-    { name = "relate" },
+    { name = "relate-search" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "gist" },
+    { name = "gist-search" },
     { name = "pytest" },
     { name = "ruff" },
 ]
@@ -21,12 +21,12 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "irregex", editable = "../../../irregex/bindings/python" },
-    { name = "relate", editable = "../../../relate/bindings/python" },
+    { name = "relate-search", editable = "../../../relate/bindings/python" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "gist", editable = "../../../gist/bindings/python" },
+    { name = "gist-search", editable = "../../../gist/bindings/python" },
     { name = "pytest", specifier = ">=9.0" },
     { name = "ruff", specifier = ">=0.15" },
 ]
@@ -41,8 +41,8 @@ wheels = [
 ]
 
 [[package]]
-name = "gist"
-version = "0.1.0"
+name = "gist-search"
+version = "1.0.0"
 source = { editable = "../../../gist/bindings/python" }
 dependencies = [
     { name = "irregex" },
@@ -69,7 +69,7 @@ wheels = [
 
 [[package]]
 name = "irregex"
-version = "0.2.0"
+version = "1.0.0"
 source = { editable = "../../../irregex/bindings/python" }
 
 [package.metadata]
@@ -124,7 +124,7 @@ wheels = [
 ]
 
 [[package]]
-name = "relate"
+name = "relate-search"
 version = "0.1.0"
 source = { editable = "../../../relate/bindings/python" }
 dependencies = [
@@ -136,7 +136,7 @@ requires-dist = [{ name = "irregex", editable = "../../../irregex/bindings/pytho
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "gist", editable = "../../../gist/bindings/python" },
+    { name = "gist-search", editable = "../../../gist/bindings/python" },
     { name = "pytest", specifier = ">=9.0" },
     { name = "ruff", specifier = ">=0.15" },
 ]

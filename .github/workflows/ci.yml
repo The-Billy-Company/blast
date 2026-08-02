@@ -100,7 +100,7 @@ jobs:
       - run: zig build test
       # The default install step, which `check` and `test` both skip: it is the
       # only rung that runs the macOS libtool re-archive, links libblast against
-      # libirregex, and stages the three headers. Those are the artifact a
+      # libirgx, and stages the three headers. Those are the artifact a
       # consumer receives, and macOS is the half of this matrix that has its own
       # code path through them.
       - run: zig build --summary none
@@ -149,7 +149,7 @@ jobs:
       # pair is guarded on a built library. Each package is built in its own
       # checkout because that is where the bindings look — the resolver walks to
       # the checkout that owns a name and reads its zig-out/, so `gist` comes
-      # from gist/, `relate` from relate/, libirregex from irregex/, and blast's
+      # from gist/, `relate` from relate/, libirgx from irregex/, and blast's
       # own binary and dylib from here. (It would otherwise build them itself,
       # mid-test, inside a 600 s timeout; better to pay it once, in the open.)
       - name: Build the binaries and libraries the suite drives
@@ -170,7 +170,7 @@ jobs:
 
   go:
     # The Go module is pure Go by default (the in-process tier is behind
-    # `-tags irregex_ffi`), so nothing here needs cgo or a prebuilt archive.
+    # `-tags irgx_ffi`), so nothing here needs cgo or a prebuilt archive.
     # Both engines are still built, because the composed verbs answer through
     # them: without a reachable binary those tests skip, and a job that vets a
     # module without running its subject is a green tick over an untested seam.

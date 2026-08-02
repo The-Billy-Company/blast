@@ -3,7 +3,7 @@
 `linkLibrary` records the dependency's own build output directory as an rpath, and
 in this build that is a *relative* `.zig-cache/o/<hash>` path — true on the machine
 that produced it and meaningless everywhere else. A product dylib carrying only
-that rpath cannot resolve `@rpath/libirregex.dylib` when a consumer opens it, so it
+that rpath cannot resolve `@rpath/libirgx.dylib` when a consumer opens it, so it
 fails at load with no call ever reaching the engine. `build.zig` adds a
 loader-relative rpath so the shape we actually ship — every library in one lib
 directory — is the loadable one; this is the gate on that.
@@ -26,6 +26,8 @@ from pathlib import Path
 import pytest
 
 PRODUCT = "blast"
+# The engine's library is `libirgx`; the checkout it is built in is still `irregex`.
+SUBSTRATE, SUBSTRATE_CHECKOUT = "irgx", "irregex"
 SUFFIX = ".dylib" if sys.platform == "darwin" else ".so"
 
 
@@ -38,8 +40,8 @@ def _checkout(name: str) -> Path | None:
     return None
 
 
-def _library(name: str) -> Path | None:
-    root = _checkout(name)
+def _library(name: str, checkout: str | None = None) -> Path | None:
+    root = _checkout(checkout or name)
     if root is None:
         return None
     built = root / "zig-out" / "lib" / f"lib{name}{SUFFIX}"
@@ -63,9 +65,9 @@ def _open_in_a_child(library: Path, cwd: Path) -> subprocess.CompletedProcess[st
 @pytest.fixture
 def installed(tmp_path: Path) -> Path:
     """Both libraries in one directory, the way a consumer receives them."""
-    product, substrate = _library(PRODUCT), _library("irregex")
+    product, substrate = _library(PRODUCT), _library(SUBSTRATE, SUBSTRATE_CHECKOUT)
     if product is None or substrate is None:
-        pytest.skip(f"lib{PRODUCT} or libirregex is not built; run `zig build` in both checkouts")
+        pytest.skip(f"lib{PRODUCT} or lib{SUBSTRATE} is not built; run `zig build` in both checkouts")
     lib = tmp_path / "lib"
     lib.mkdir()
     for artifact in (product, substrate):
@@ -83,7 +85,7 @@ def test_it_still_imports_the_substrate_rather_than_carrying_one(installed: Path
     """The other half. If the product quietly compiled its own copy of the engine it
     would load happily with no substrate beside it — and then hand back handles no
     other library can interpret."""
-    (installed / f"libirregex{SUFFIX}").unlink()
+    (installed / f"lib{SUBSTRATE}{SUFFIX}").unlink()
     done = _open_in_a_child(installed / f"lib{PRODUCT}{SUFFIX}", tmp_path)
     assert done.returncode != 0, (
         f"lib{PRODUCT} loaded with no substrate present — it is not importing the shared engine"

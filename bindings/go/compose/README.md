@@ -26,7 +26,7 @@ contract and runtime are irregex.
 go get github.com/The-Billy-Company/blast/bindings/go/compose
 ```
 
-Default build is pure Go. In-process is opt-in: `go build -tags irregex_ffi`
+Default build is pure Go. In-process is opt-in: `go build -tags irgx_ffi`
 after `zig build` has minted `zig-out/lib/libblast.dylib`.
 
 ```go

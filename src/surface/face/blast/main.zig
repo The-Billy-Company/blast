@@ -32,7 +32,7 @@ const relate = @import("relate");
 /// Sign diagnostics as the program the user actually typed. Only the name
 /// moves: the knobs and artifact directory stay the ecosystem's, since this
 /// binary reads the index, atlas, and shelf the siblings write.
-pub const irregex_brand: irregex.Brand = .{ .name = "blast" };
+pub const irgx_brand: irregex.Brand = .{ .name = "blast" };
 
 pub fn main(init: std.process.Init) void {
     relate.cli.manifest.drive(

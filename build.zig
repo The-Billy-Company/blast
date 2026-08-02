@@ -7,7 +7,7 @@
 //! compression kernels + composition + the CLI vocabulary this face wears) —
 //! so this graph is deliberately small. The C floors (PCRE2 under irregex,
 //! libsais under relate) and gist's daemon (the answer keep) ride in
-//! transitively on those modules. `libblast` dynamically links `libirregex`
+//! transitively on those modules. `libblast` dynamically links `libirgx`
 //! for the substrate symbols it does not redefine.
 
 const std = @import("std");
@@ -55,22 +55,22 @@ pub fn build(b: *std.Build) void {
 
     // ── the C-ABI dual artifact ──
     // Rooted at the export shims so no dependent of a blast module would
-    // re-emit `blast_run`. Substrate symbols resolve through libirregex.
-    const irregex_dep = b.dependency("irregex", .{ .target = target, .optimize = lib_optimize });
-    const irregex_lib = irregex_dep.artifact("irregex");
+    // re-emit `blast_run`. Substrate symbols resolve through libirgx.
+    const irgx_dep = b.dependency("irregex", .{ .target = target, .optimize = lib_optimize });
+    const irgx_lib = irgx_dep.artifact("irgx");
     const abi = b.createModule(.{
         .root_source_file = b.path("src/surface/ffi/exports.zig"),
         .target = target,
         .optimize = lib_optimize,
         .pic = true,
-        .imports = &.{.{ .name = "irregex", .module = irregex_dep.module("irregex") }},
+        .imports = &.{.{ .name = "irregex", .module = irgx_dep.module("irregex") }},
     });
-    abi.linkLibrary(irregex_lib);
+    abi.linkLibrary(irgx_lib);
     // A shipped dylib has to find its substrate beside itself. `linkLibrary`
     // records only this build tree's own output dir — a RELATIVE
     // `.zig-cache/o/<hash>` path, meaningless on a consumer's machine — so
     // `dlopen("libblast.dylib")` from anywhere else cannot resolve
-    // `@rpath/libirregex.dylib` and fails at load. A loader-relative rpath makes
+    // `@rpath/libirgx.dylib` and fails at load. A loader-relative rpath makes
     // the shape we actually ship ("both libraries in one lib dir") the loadable
     // one, without naming an absolute path we do not own.
     abi.addRPathSpecial(if (target.result.os.tag == .macos) "@loader_path" else "$ORIGIN");
@@ -80,7 +80,7 @@ pub fn build(b: *std.Build) void {
     // dep on gist (the engine comes through relate), but the C ABI names
     // gist_engine / gist_cancel, so the header installs beside ours.
     dynamic_lib.installHeader(b.path("../gist/include/gist.h"), "gist.h");
-    dynamic_lib.installHeader(irregex_dep.path("include/irregex.h"), "irregex.h");
+    dynamic_lib.installHeader(irgx_dep.path("include/irgx.h"), "irgx.h");
     b.installArtifact(dynamic_lib);
     if (target.result.os.tag == .macos) {
         const obj = b.addObject(.{ .name = "blast", .root_module = abi });
@@ -92,13 +92,13 @@ pub fn build(b: *std.Build) void {
         const static_lib = b.addLibrary(.{ .name = "blast", .linkage = .static, .root_module = abi });
         b.installArtifact(static_lib);
     }
-    b.installArtifact(irregex_lib);
+    b.installArtifact(irgx_lib);
 
     // `zig build test` — the face's own unit tests plus the FFI dispatch.
     // Debug regardless of the CLI's ReleaseFast posture, since a release
     // build elides the safety checks a test is partly there to trip.
     const test_deps = [_]std.Build.Module.Import{
-        .{ .name = "irregex", .module = irregex_dep.module("irregex") },
+        .{ .name = "irregex", .module = irgx_dep.module("irregex") },
         .{ .name = "relate", .module = b.dependency("relate", .{ .target = target, .optimize = .Debug }).module("relate") },
     };
     const tests = b.addTest(.{
@@ -114,7 +114,7 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("src/surface/ffi/analytic.zig"),
             .target = target,
             .optimize = .Debug,
-            .imports = &.{.{ .name = "irregex", .module = irregex_dep.module("irregex") }},
+            .imports = &.{.{ .name = "irregex", .module = irgx_dep.module("irregex") }},
         }),
     });
     const test_step = b.step("test", "Run unit tests");

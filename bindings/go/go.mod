@@ -1,8 +1,8 @@
 // Standalone Go module — intentionally NOT in any parent workspace.
 //
 // Default build is pure Go and answers through the installed `blast` binary.
-// The in-process tier is opt-in (`-tags irregex_ffi`) and links `libblast`
-// plus `libirregex` from this checkout's zig-out/.
+// The in-process tier is opt-in (`-tags irgx_ffi`) and links `libblast`
+// plus `libirgx` from this checkout's zig-out/.
 //
 // Contract + runtime come from the irregex module; typed kinship row views
 // come from the relate module. This module is the composed verbs only.

@@ -16,5 +16,5 @@ from irregex; typed kinship row views come from relate.
 go get github.com/The-Billy-Company/blast/bindings/go
 ```
 
-Default build is pure Go. In-process is opt-in with `-tags irregex_ffi` after
+Default build is pure Go. In-process is opt-in with `-tags irgx_ffi` after
 `zig build`. Release tags are nested: `bindings/go/vX.Y.Z`.

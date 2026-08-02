@@ -2,7 +2,8 @@
 
 The composed face - the two questions that need BOTH engines and CURRENT
 bytes. The package is named `blast` and so is the binary. The `irregex`
-name stays with the engine library (`libirregex` / `include/irregex.h`).
+name stays with the engine package, whose library and header are `libirgx` /
+`include/irgx.h`.
 
 ## What it is
 

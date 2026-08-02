@@ -2,17 +2,17 @@
  *
  * The four composed verbs that need both engines over CURRENT bytes
  * (blast_run). Everything this header does not itself declare comes from
- * libirregex via <irregex.h>: status codes, the fault pull, the warm engine and
- * its cancel token, and the row cursor (irregex_rows_*). Link libblast and
- * libirregex.
+ * libirgx via <irgx.h>: status codes, the fault pull, the warm engine and
+ * its cancel token, and the row cursor (irgx_rows_*). Link libblast and
+ * libirgx.
  *
- * blast_run returns an irregex_rows * walked by the four irregex_rows_*
+ * blast_run returns an irgx_rows * walked by the four irgx_rows_*
  * symbols. That is deliberate: gist_run, relate_run, and blast_run all hand
  * back the same cursor, and all three take the same engine. */
 #ifndef BLAST_H
 #define BLAST_H
 
-#include <irregex.h>
+#include <irgx.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -46,7 +46,7 @@ typedef struct {
   uint32_t flags;
   const uint8_t *text;
   size_t text_len;
-  const irregex_text *patterns;
+  const irgx_text *patterns;
   size_t npatterns;
   double max_distance;
   double min_echo;
@@ -56,17 +56,17 @@ typedef struct {
 
 /* Run one blast verb and materialize a row cursor; writes it to *out.
  * `op` is a BLAST_OP_* code and `params` MUST be the compose family — a
- * mismatched or wrongly-sized struct is IRREGEX_INVALID. `cancel` is optional
+ * mismatched or wrongly-sized struct is IRGX_INVALID. `cancel` is optional
  * (NULL = none) and is the same token the exact plane uses.
  *
- * Returns IRREGEX_OK, or a negative fail-closed status. IRREGEX_STALE means
+ * Returns IRGX_OK, or a negative fail-closed status. IRGX_STALE means
  * this tier declines and the caller should answer through the subprocess
  * fallback — it is NOT a failure.
  *
- * The cursor is an irregex_rows *: walk it with irregex_rows_next /
- * _next_batch / _stats and free it with irregex_rows_close from libirregex. */
-int32_t blast_run(irregex_engine *engine, uint32_t op, const void *params,
-                  irregex_cancel *cancel, irregex_rows **out);
+ * The cursor is an irgx_rows *: walk it with irgx_rows_next /
+ * _next_batch / _stats and free it with irgx_rows_close from libirgx. */
+int32_t blast_run(irgx_engine *engine, uint32_t op, const void *params,
+                  irgx_cancel *cancel, irgx_rows **out);
 
 #ifdef __cplusplus
 }

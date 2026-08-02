@@ -11,8 +11,8 @@ Both engines on one question: `blast` (what moves if this symbol changes) and
 
 from __future__ import annotations
 
-from irregex.runtime import shell as engine
-from irregex.runtime.errors import (
+from irgx.runtime import shell as engine
+from irgx.runtime.errors import (
     GistError,
     GistNotFoundError,
     RowDecodeError,

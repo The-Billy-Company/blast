@@ -31,7 +31,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from irregex.runtime import shell
+from irgx.runtime import shell
 from relate.corpus import CORPUS_TIMEOUT, Scope, merge_paths, run
 
 if TYPE_CHECKING:

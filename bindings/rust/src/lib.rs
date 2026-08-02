@@ -21,8 +21,8 @@ mod verbs;
 
 pub use verbs::Composed;
 
-pub use irregex::contract::{Channel, Grade, Unit, Variant};
-pub use irregex::runtime::{
+pub use irgx::contract::{Channel, Grade, Unit, Variant};
+pub use irgx::runtime::{
     Batch, Error, OwnedRow, OwnedValue, Result, Row, RowSeq, Rows, Stats, Texts, Tier, Value,
 };
 
@@ -62,7 +62,7 @@ pub fn provenance(snippet: impl Into<String>) -> Composed {
 /// tangential twins, same-language ripple, and comments that mention it.
 ///
 /// [`Composed::budget`] trims the low-priority tail; what it trimmed is counted
-/// in [`Stats::omitted`](irregex::runtime::Stats::omitted), never silently dropped.
+/// in [`Stats::omitted`](irgx::runtime::Stats::omitted), never silently dropped.
 pub fn blast(symbol: impl Into<String>) -> Composed {
     Composed::new(OP_BLAST).text(symbol)
 }

@@ -34,14 +34,15 @@ packages = [ "blast" ]
 
 [tool.uv.sources]
 irregex = { path = "../../../irregex/bindings/python", editable = true }
-gist = { path = "../../../gist/bindings/python", editable = true }
+gist-search = { path = "../../../gist/bindings/python", editable = true }
 relate-search = { path = "../../../relate/bindings/python", editable = true }
 
 [dependency-groups]
 dev = [
   "pytest>=9.0",
   "ruff>=0.15",
-  "gist",  # oracle face for exact-search checks in behavioral tests
+  # distribution `gist-search`, import `gist` — the bare name was taken on PyPI.
+  "gist-search",  # oracle face for exact-search checks in behavioral tests
 ]
 
 [tool.pytest.ini_options]
@@ -55,4 +56,4 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 ignore = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["blast", "relate", "irregex", "gist"]
+known-first-party = ["blast", "relate", "irgx", "gist"]
