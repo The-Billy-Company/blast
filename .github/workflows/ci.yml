@@ -73,20 +73,20 @@ jobs:
       # read it. ECOSYSTEM_TOKEN is a secret with read access to it; the
       # fallback keeps the two public packages fetchable without one, so a fork
       # gets three of four repos and a legible failure rather than a mystery.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: blast
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/irregex
           path: irregex
           token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/relate
           path: relate
           token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/gist
           path: gist
@@ -123,20 +123,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Same four-repo layout as the engine job; see the comment there.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: blast
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/irregex
           path: irregex
           token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/relate
           path: relate
           token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/gist
           path: gist
@@ -157,7 +157,7 @@ jobs:
           for package in irregex gist relate blast; do
             ( cd "$package" && zig build --summary none )
           done
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - name: pytest on 3.12 (the declared floor)
         working-directory: blast/bindings/python
         run: uv run --python 3.12 pytest -q
@@ -191,20 +191,20 @@ jobs:
       # Same four-repo layout as the engine job; see the comment there. gist is
       # needed even though no Go code touches it: relate's package graph and
       # blast's header install both reach for it.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: blast
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/irregex
           path: irregex
           token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/relate
           path: relate
           token: ${{ secrets.ECOSYSTEM_TOKEN || github.token }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/gist
           path: gist
@@ -216,7 +216,7 @@ jobs:
         working-directory: blast
       - run: zig build --summary none
         working-directory: relate
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: blast/bindings/go/go.mod
       - run: go vet ./...
@@ -243,10 +243,10 @@ jobs:
       run:
         working-directory: blast/bindings/rust
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: blast
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: The-Billy-Company/irregex
           path: irregex
@@ -282,7 +282,7 @@ jobs:
     # a different Zig would be checking against a different grid.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: mlugg/setup-zig@v2
         with:
           version: ${{ env.ZIG_VERSION }}
