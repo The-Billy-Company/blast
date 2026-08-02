@@ -12,6 +12,7 @@
 
 const std = @import("std");
 const builtin = @import("builtin");
+const brigade = @import("brigade");
 
 pub fn build(b: *std.Build) void {
     // macOS deployment floor: below any plausible consumer link target
@@ -141,7 +142,8 @@ pub fn build(b: *std.Build) void {
         .imports = &test_deps,
     });
     test_face.addOptions("build_options", version);
-    const tests = b.addTest(.{ .root_module = test_face });
+    const bg = brigade.init(b, .{});
+    const tests = b.addTest(.{ .root_module = test_face, .test_runner = bg.runner() });
     const ffi_tests = b.addTest(.{
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/surface/ffi/analytic.zig"),
@@ -149,10 +151,18 @@ pub fn build(b: *std.Build) void {
             .optimize = .Debug,
             .imports = &.{.{ .name = "irregex", .module = irgx_dep.module("irregex") }},
         }),
+        .test_runner = bg.runner(),
     });
     const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&b.addRunArtifact(tests).step);
-    test_step.dependOn(&b.addRunArtifact(ffi_tests).step);
+    bg.shard(test_step, tests, .{});
+    // The FFI dispatch is a handful of tests over shims; splitting them across
+    // processes costs more than it saves. Folded in only on an unfiltered run —
+    // brigade fails a shard whose filter matched none of its tests, which is
+    // right for one binary and wrong across two, where a name living in the
+    // other plane is not a typo.
+    const ffi_step = b.step("test-ffi", "Run the FFI dispatch's unit tests (folded into `test`)");
+    bg.shard(ffi_step, ffi_tests, .{ .count = 1 });
+    if (!bg.narrowed()) test_step.dependOn(ffi_step);
 
     // `zig build check` — compile without installing, for the edit loop.
     b.step("check", "Compile the blast binary without installing").dependOn(&exe.step);
@@ -163,6 +173,7 @@ pub fn build(b: *std.Build) void {
     const run_cov = b.addSystemCommand(&.{ "kcov", "--clean", "--include-pattern=src/" });
     run_cov.addArg(b.pathFromRoot(".local/coverage"));
     run_cov.addArtifactArg(tests);
+    bg.whole(run_cov);
     b.step("coverage", "Run unit tests under kcov → .local/coverage/ (Cobertura XML)")
         .dependOn(&run_cov.step);
 }

@@ -8,6 +8,8 @@
         // publish script — see the ecosystem split plan.
         .irregex = .{ .path = "../irregex" },
         .relate = .{ .path = "../relate" },
+        // The shard-aware test runner (build-time only, no artifact, no ABI).
+        .brigade = .{ .path = "../brigade" },
     },
     .paths = .{
         "build.zig",
