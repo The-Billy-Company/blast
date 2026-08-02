@@ -67,7 +67,9 @@ def installed(tmp_path: Path) -> Path:
     """Both libraries in one directory, the way a consumer receives them."""
     product, substrate = _library(PRODUCT), _library(SUBSTRATE, SUBSTRATE_CHECKOUT)
     if product is None or substrate is None:
-        pytest.skip(f"lib{PRODUCT} or lib{SUBSTRATE} is not built; run `zig build` in both checkouts")
+        pytest.skip(
+            f"lib{PRODUCT} or lib{SUBSTRATE} is not built; run `zig build` in both checkouts"
+        )
     lib = tmp_path / "lib"
     lib.mkdir()
     for artifact in (product, substrate):
@@ -89,4 +91,14 @@ def test_it_still_imports_the_substrate_rather_than_carrying_one(installed: Path
     done = _open_in_a_child(installed / f"lib{PRODUCT}{SUFFIX}", tmp_path)
     assert done.returncode != 0, (
         f"lib{PRODUCT} loaded with no substrate present — it is not importing the shared engine"
+    )
+
+def test_the_package_declares_its_annotations_to_consumers():
+    """Every function in this package is annotated, and PEP 561 says a consumer's
+    type checker must ignore all of it unless the package ships this marker. So the
+    failure mode is silent in both directions: nothing here breaks, and everyone
+    downstream quietly gets `Any` for the whole API."""
+    package = Path(__file__).resolve().parents[1] / PRODUCT
+    assert (package / "py.typed").is_file(), (
+        f"{PRODUCT} annotates its public API and then hides it: no py.typed marker"
     )
