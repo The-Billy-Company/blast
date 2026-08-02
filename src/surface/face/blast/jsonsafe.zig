@@ -85,10 +85,10 @@ test "str: valid UTF-8 is byte-identical to raw jsonStr (the common path is unch
 
 test "str: invalid UTF-8 becomes valid JSON, parseable, with U+FFFD for the bad bytes" {
     for ([_][]const u8{
-        "a\xffb",             // a lone 0xFF
-        "\x80\x81",           // stray continuation bytes
-        "e\xc3",              // a truncated 2-byte lead at EOF
-        "\xed\xa0\x80",       // a UTF-16 surrogate, ill-formed in UTF-8
+        "a\xffb", // a lone 0xFF
+        "\x80\x81", // stray continuation bytes
+        "e\xc3", // a truncated 2-byte lead at EOF
+        "\xed\xa0\x80", // a UTF-16 surrogate, ill-formed in UTF-8
         "ok\xf0\x28\x8c\x28", // overlong/broken 4-byte sequence amid ASCII
     }) |s| {
         var buf: std.ArrayList(u8) = .empty;
