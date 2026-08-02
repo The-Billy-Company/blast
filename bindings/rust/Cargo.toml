@@ -18,7 +18,7 @@ exclude = [ "/target", "/.cargo" ]
 # resolve the same version range through the registry; the path override is
 # only for this checkout. Blast also depends on relate in Zig; the binding
 # only needs the shared substrate for row decode / transports.
-irregex = { version = "0.1.0", path = "../../../irregex/bindings/rust" }
+irregex = { version = "1.0.0", path = "../../../irregex/bindings/rust" }
 
 [dev-dependencies]
 tempfile = "3"
