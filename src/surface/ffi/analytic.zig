@@ -202,3 +202,85 @@ test "every blast verb declines today — none can fall through" {
         try t.expect(@intFromEnum(verb.schema) >= 1 and @intFromEnum(verb.schema) <= table.schemas.len);
     }
 }
+
+// ── adversarial additions: the decline matrix, exhaustively ────────────────
+//
+// The two tests above spot-check the fail-closed boundary. These make it a
+// MATRIX, so a future "graduate this op off Decline" change cannot silently
+// skip a rejection this file already guaranteed: every wrong `struct_size`,
+// every op a sibling library owns, every op code past the table, and a spread
+// of unassigned flag bits must all be `.invalid` — and each of these paths
+// returns BEFORE the engine is dereferenced, which is why a bogus engine
+// pointer is safe here (validation precedes work, by contract).
+
+const fake_engine: *api.Engine = @ptrFromInt(@alignOf(api.Engine));
+
+fn composeParams() rows.Params {
+    return .{ .compose = .{
+        .struct_size = @sizeOf(rows.ComposeParams),
+        .flags = 0,
+        .text = null,
+        .text_len = 0,
+        .patterns = null,
+        .npatterns = 0,
+        .max_distance = 0,
+        .min_echo = 0,
+        .budget = 0,
+        .top = 0,
+    } };
+}
+
+test "FFI: a wrong params struct_size fails closed before any work" {
+    const t = std.testing;
+    var out: *Answer = undefined;
+    const prov = @intFromEnum(table.Op.provenance);
+    for ([_]u32{ 0, @sizeOf(rows.ComposeParams) - 4, @sizeOf(rows.ComposeParams) + 4, 1 }) |sz| {
+        var p = composeParams();
+        p.compose.struct_size = sz; // the family/size gate rejects at the boundary
+        try t.expectEqual(Status.invalid, run(fake_engine, prov, &p, null, &out));
+    }
+}
+
+test "FFI: no op a sibling library owns is answered by blast_run" {
+    // Every relate/gist verb, handed to blast's entry with otherwise-valid
+    // params, is rejected at the ownership gate rather than declining into a
+    // CLI fallback for the wrong binary. Also pins the owned set is exactly the
+    // four compose verbs — a fifth appearing here without the switch below
+    // learning it would be caught by the sibling test's build break.
+    const t = std.testing;
+    var out: *Answer = undefined;
+    var p = composeParams();
+    var owned_count: usize = 0;
+    for (table.verbs, 1..) |verb, op| {
+        if (owned(verb.op)) {
+            owned_count += 1;
+        } else {
+            try t.expectEqual(Status.invalid, run(fake_engine, @intCast(op), &p, null, &out));
+        }
+    }
+    try t.expectEqual(@as(usize, 4), owned_count); // context, family, provenance, blast
+}
+
+test "FFI: op codes past the table fail closed" {
+    const t = std.testing;
+    var out: *Answer = undefined;
+    var p = composeParams();
+    for (0..8) |k| {
+        const op: u32 = @intCast(table.verbs.len + 1 + k);
+        try t.expectEqual(Status.invalid, run(fake_engine, op, &p, null, &out));
+    }
+}
+
+test "FFI: unassigned flag bits fail closed" {
+    // Only bits 0..8 are assigned (rows.known_an_flags); anything at or above
+    // bit 9 is a caller writing into reserved space and must be refused, alone
+    // or combined with a legitimate bit.
+    const t = std.testing;
+    var out: *Answer = undefined;
+    const prov = @intFromEnum(table.Op.provenance);
+    for ([_]u32{ 1 << 9, 1 << 15, 1 << 20, 1 << 31, (1 << 9) | rows.an_max_distance }) |bit| {
+        var p = composeParams();
+        p.compose.flags = bit;
+        try t.expectEqual(Status.invalid, run(fake_engine, prov, &p, null, &out));
+    }
+}
