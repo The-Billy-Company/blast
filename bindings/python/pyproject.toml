@@ -5,16 +5,24 @@
 # The floor tracks the `irregex` substrate's, since this package cannot import
 # without it. There is no upper bound: the monorepo this was extracted from
 # pins one interpreter, but a published library has no business refusing 3.15.
+#
+# The distribution is `blast-search`; the import stays `blast`. The bare name on
+# PyPI belongs to an unrelated author (a web music player), so publishing under
+# it was never available — and a plain `pip install blast` fetches that
+# stranger's package into a tree that then imports `blast`. Splitting the two
+# names is the same shape bs4, PIL, and cv2 already ship, and the same split
+# `gist-search` and `relate-search` made next door. Both siblings this depends
+# on are spelled by their distribution names below for the same reason.
 
 [project]
-name = "blast"
+name = "blast-search"
 version = "0.1.0"
 description = "Importable Python API for blast composed search verbs."
 requires-python = ">=3.12"
 license = "Apache-2.0"
 dependencies = [
   "irregex",
-  "relate",
+  "relate-search",
 ]
 
 [build-system]
@@ -27,7 +35,7 @@ packages = [ "blast" ]
 [tool.uv.sources]
 irregex = { path = "../../../irregex/bindings/python", editable = true }
 gist = { path = "../../../gist/bindings/python", editable = true }
-relate = { path = "../../../relate/bindings/python", editable = true }
+relate-search = { path = "../../../relate/bindings/python", editable = true }
 
 [dependency-groups]
 dev = [
