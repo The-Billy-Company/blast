@@ -16,8 +16,9 @@ const blast = @import("blast.zig");
 
 pub const face = manifest.Face{
     .tool = "blast",
-    .tagline = "blast — composed search: exact match narrows, compression reasons inside",
-    .summary = "the composed face, for the two questions that need CURRENT bytes rather than a narrowing: provenance (quotation attribution re-verified against the live file) and blast (the live blast radius of a symbol, computed from current bytes with no precomputed graph). composition-as-narrowing became a modifier — `relate pack --matching` and `relate echoes --matching` are what `irregex context` and `blast family` were, now combinable with every other axis those verbs have. gist and relate stay the direct faces.",
+    .tagline = "blast — what moves when you change a symbol, read from the bytes on disk right now",
+    .summary = "a blast radius tool for coding agents: name a symbol and blast reports what it holds up — where it is declared, the functions and file-scope registries that reference it, what its own body leans on, the comments an edit would falsify, and the files that historically move with it. every edge is derived on demand from current bytes, so there is no project model to configure, no graph to rebuild, and no language the parser-free signals cannot read. authored code outranks codegen everywhere, and ranking runs before the caps so generated stubs can never evict the call sites you have to edit. the second verb, provenance, answers where a pasted snippet came from and whether the tree still holds it. gist answers exact patterns; relate answers similarity.",
+    .bare = "blast",
     .verbs = &.{
         .{
             .name = "provenance",
@@ -38,8 +39,8 @@ pub const face = manifest.Face{
             .name = "blast",
             .asks = "what moves if I change this symbol",
             .form = "SYMBOL [--budget N] [--json] {ROOT... | (whole corpus)}",
-            .blurb = "the live blast radius of a symbol — its definition, the functions\nthat depend on it and that it depends on, its file's compression\ntwins, second-hop ripple, and the comments that mention it — all\nfrom CURRENT bytes, so a mid-edit file counts the moment it saves",
-            .summary = "the live blast radius of a symbol computed from CURRENT bytes (no precomputed graph, so a mid-edit file counts the moment it saves): the seed's definition site(s) + kind guess, direct dependents (functions referencing it, def/use classified) and dependencies (identifiers the seed's body resolves to), tangential twins (compression kin of the seed's file — co-edit risk) and ripple (second-hop callers, hops=2), and comments that MENTION it (stale-doc / TODO surface). Exact and statistical evidence stay in separate fields — never a fused score",
+            .blurb = "what the symbol holds up — its declaration, every reference to it\n(in a function, at file scope, or wired by string), what its own\nbody leans on, the comments an edit falsifies, and the files that\nmove with it; authored code ranked above codegen, before the caps",
+            .summary = "the live blast radius of a symbol computed from CURRENT bytes (no precomputed graph, so a mid-edit file counts the moment it saves): the seed's definition site(s) + kind guess, direct dependents (every reference, classified def/use/str — a reference at FILE SCOPE counts, because registries, dispatch tables and export lists are where a rename breaks a build) and dependencies (identifiers the seed's body resolves to), tangential twins (compression kin of the seed's file — co-edit risk) and ripple (second-hop callers, hops=2), and comments that MENTION it (stale-doc / TODO surface). Codegen is tagged `gen` and sorted last rather than hidden, and the sort runs BEFORE the caps so generated stubs cannot evict authored call sites. Exact and statistical evidence stay in separate fields — never a fused score",
             .args = &.{
                 .{ .name = "symbol", .required = true, .doc = "the identifier (or concept token) to blast" },
                 .{ .name = "ROOT...", .kind = "string[]", .doc = "corpus roots to narrow to; default is the whole CWD corpus" },
@@ -67,7 +68,8 @@ pub const face = manifest.Face{
         },
     },
     .notes = &.{
-        .{ .key = "candidate_set", .text = "blast selects the seed's neighborhood by word-bounded search + function-region extraction; the narrowing composition (exact select, then compression inside the matching set) now lives on the relate verbs as --matching" },
+        .{ .key = "candidate_set", .text = "blast walks each file once, word-bounded, and the span lexer decides what each hit is: a reference in code, a name inside a string literal, or a mention in a comment. a reference's unit is its enclosing function where there is one and the line itself at file scope, so nothing is dropped for living outside a function body" },
+        .{ .key = "ranking", .text = "authored code outranks codegen in the seed and the dependents alike, and the sort runs before the caps — a symbol with six authored call sites and four hundred generated ones reports the six. generated rows are tagged, never deleted" },
         .{ .key = "scoring", .text = "exact and compression signals stay in SEPARATE fields — no fused relevance number" },
         .{ .key = "corpus_policy", .text = "provenance reads the corpus-wide codex shelf; blast scopes to the whole CWD corpus by default, narrowable with ROOT..." },
     },
@@ -76,12 +78,19 @@ pub const face = manifest.Face{
         .{ .code = 2, .means = "usage, parse, pattern, or missing-shelf error" },
     },
     .epilogue =
+    \\reading a report:
+    \\  [use] / [def]             a reference in code, or one that redeclares it
+    \\  [str]                     a name wired by string — reflection, SQL, a route
+    \\  [gen]                     codegen output: ranked last, never an edit target
+    \\  in <name>                 the enclosing function; absent means file scope
+    \\  dist=                     compression kinship, not a reference (co-edit risk)
+    \\
     \\niche choices:
     \\  provenance --min-phrase N raise the phrase floor to drop trivial quotes
     \\  provenance -C N           context lines around each located phrase
-    \\  blast --budget N          soft token cap; trims the lowest-priority tail
-    \\  blast (scope)             ROOT... narrows; default is the whole CWD corpus
-    \\  --json                    NDJSON on stdout; diagnostics stay on stderr
+    \\  --budget N                soft token cap; trims the lowest-priority tail
+    \\  (scope)                   ROOT... narrows; default is the whole CWD corpus
+    \\  --json                    one report object; diagnostics stay on stderr
     \\
     \\composition is a flag now, not a verb:
     \\  relate pack --matching PAT <text>        the reading set among matching files

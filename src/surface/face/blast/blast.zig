@@ -137,22 +137,36 @@ const Plan = struct {
     }
 };
 
+/// How a reference reads in one word: it redefines the symbol, it calls it, or
+/// it names it in a string. A generated row wears its tag too, because "this
+/// call site is regenerated from a contract" is the difference between a file
+/// to edit and a file to leave alone.
+fn tagOf(d: blast.Dependent) []const u8 {
+    const use: []const u8 = if (d.defines) "def" else if (d.literal) "str" else "use";
+    if (!d.generated) return use;
+    return if (d.defines) "def gen" else if (d.literal) "str gen" else "use gen";
+}
+
 fn renderHuman(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.Report, paths: []const []const u8, plan: *Plan) void {
     out.print(gpa, "blast {s}  [{s}]\n", .{ r.symbol, @tagName(r.kind) }) catch oom();
 
     out.appendSlice(gpa, "seed:\n") catch oom();
     if (r.def.len == 0) out.appendSlice(gpa, "  (no definition site found)\n") catch oom();
-    for (r.def) |s| out.print(gpa, "  {s}\n", .{emit.locator(gpa, paths[s.doc], s.line)}) catch oom();
+    for (r.def) |s| {
+        if (s.generated)
+            out.print(gpa, "  {s}  [gen]\n", .{emit.locator(gpa, paths[s.doc], s.line)}) catch oom()
+        else
+            out.print(gpa, "  {s}\n", .{emit.locator(gpa, paths[s.doc], s.line)}) catch oom();
+    }
 
     if (r.dependents.len > 0) {
         out.print(gpa, "direct dependents ({d} of {d}):\n", .{ r.dependents.len, r.stats.dependents_total }) catch oom();
         for (r.dependents) |d| {
             if (!plan.admit(rowCost(paths[d.doc].len + d.enclosing.len))) continue;
-            const tag = if (d.defines) "def" else "use";
             if (d.enclosing.len > 0)
-                out.print(gpa, "  {s}  in {s}  [{s}]\n", .{ emit.locator(gpa, paths[d.doc], d.line), d.enclosing, tag }) catch oom()
+                out.print(gpa, "  {s}  in {s}  [{s}]\n", .{ emit.locator(gpa, paths[d.doc], d.line), d.enclosing, tagOf(d) }) catch oom()
             else
-                out.print(gpa, "  {s}  [{s}]\n", .{ emit.locator(gpa, paths[d.doc], d.line), tag }) catch oom();
+                out.print(gpa, "  {s}  [{s}]\n", .{ emit.locator(gpa, paths[d.doc], d.line), tagOf(d) }) catch oom();
         }
     }
 
@@ -201,7 +215,7 @@ fn renderJson(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.R
         if (k != 0) out.append(gpa, ',') catch oom();
         out.appendSlice(gpa, "{\"path\":") catch oom();
         jsonsafe.str(out, gpa, paths[s.doc]);
-        out.print(gpa, ",\"line\":{d}}}", .{s.line}) catch oom();
+        out.print(gpa, ",\"line\":{d},\"generated\":{}}}", .{ s.line, s.generated }) catch oom();
     }
 
     out.appendSlice(gpa, "]},\"direct\":{\"dependents\":[") catch oom();
@@ -214,7 +228,10 @@ fn renderJson(out: *std.ArrayList(u8), gpa: std.mem.Allocator, r: *const blast.R
         jsonsafe.str(out, gpa, paths[d.doc]);
         out.print(gpa, ",\"line\":{d},\"in\":", .{d.line}) catch oom();
         jsonsafe.str(out, gpa, d.enclosing);
-        out.print(gpa, ",\"use\":\"{s}\"}}", .{if (d.defines) "def" else "use"}) catch oom();
+        out.print(gpa, ",\"use\":\"{s}\",\"generated\":{}}}", .{
+            if (d.defines) "def" else if (d.literal) "str" else "use",
+            d.generated,
+        }) catch oom();
     }
     out.appendSlice(gpa, "],\"dependencies\":[") catch oom();
     first = true;
