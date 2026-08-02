@@ -58,4 +58,5 @@ test {
     _ = @import("blast.zig");
     _ = @import("provenance.zig");
     _ = @import("repertoire.zig");
+    _ = @import("jsonsafe.zig");
 }

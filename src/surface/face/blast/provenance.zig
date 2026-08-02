@@ -26,6 +26,7 @@ const cento = @import("relate").codex.cento;
 const provenance = @import("relate").compose.provenance;
 const flags = @import("relate").cli.flags;
 const emit_mod = @import("irregex").inner.cli.emit;
+const jsonsafe = @import("jsonsafe.zig");
 
 const die = @import("irregex").inner.cli.outcome.die;
 const oom = @import("irregex").inner.cli.outcome.oom;
@@ -141,9 +142,9 @@ fn emit(out: *std.ArrayList(u8), gpa: std.mem.Allocator, json: bool, phrase: []c
     if (json) {
         out.append(gpa, '{') catch oom();
         out.appendSlice(gpa, "\"text\":") catch oom();
-        emit_mod.jsonStr(out, gpa, phrase);
+        jsonsafe.str(out, gpa, phrase);
         out.print(gpa, ",\"occurrences\":{d},\"source\":", .{occurrences}) catch oom();
-        if (path) |p| emit_mod.jsonStr(out, gpa, p) else out.appendSlice(gpa, "null") catch oom();
+        if (path) |p| jsonsafe.str(out, gpa, p) else out.appendSlice(gpa, "null") catch oom();
         if (hit) |h| {
             out.print(gpa, ",\"verified\":true,\"line\":{d}", .{h.loc.line}) catch oom();
         } else {
@@ -163,4 +164,104 @@ fn emit(out: *std.ArrayList(u8), gpa: std.mem.Allocator, json: bool, phrase: []c
         emit_mod.jsonStr(out, gpa, phrase);
         out.append(gpa, '\n') catch oom();
     }
+}
+
+// ── tests ──────────────────────────────────────────────────────────────────
+//
+// `runProvenance` needs a live codex shelf (a build-time artifact) and the
+// filesystem, so it is out of a unit test's reach. `emit` is not: it is the
+// verb's whole rendering contract — the three row shapes (located / drift /
+// unattributed) and the NDJSON escaping every consuming tool parses — and it
+// takes plain values. These drive it directly, and hold the JSON output to a
+// REAL parser rather than eyeballing the bytes, because a dropped quote or a
+// raw control byte in a phrase or path is exactly the failure a hand-rolled
+// emitter ships and a brace-count never catches. `verify` (relate) mints the
+// `Located` so the located row's line is the one the kernel would actually
+// report, not a hand-picked integer.
+
+const t = std.testing;
+
+/// Split an NDJSON buffer on newlines and parse each non-empty line as one JSON
+/// object, or fail — the parser is the oracle for "is this even valid JSON?".
+fn expectNdjson(buf: []const u8, comptime want_lines: usize) ![want_lines]std.json.Parsed(std.json.Value) {
+    var out: [want_lines]std.json.Parsed(std.json.Value) = undefined;
+    var it = std.mem.tokenizeScalar(u8, buf, '\n');
+    var n: usize = 0;
+    while (it.next()) |line| : (n += 1) {
+        try t.expect(n < want_lines);
+        out[n] = try std.json.parseFromSlice(std.json.Value, t.allocator, line, .{});
+        try t.expect(out[n].value == .object);
+    }
+    try t.expectEqual(want_lines, n);
+    return out;
+}
+
+test "provenance emit: located, drift, and unattributed rows are valid NDJSON" {
+    const bytes = "alpha line\nbeta has the PHRASE right here\ngamma line\n";
+    const loc = provenance.verify(bytes, "PHRASE", 2).?; // line 2
+
+    var out: std.ArrayList(u8) = .empty;
+    defer out.deinit(t.allocator);
+    emit(&out, t.allocator, true, "PHRASE", "src.zig", .{ .loc = loc, .bytes = bytes }, 3);
+    emit(&out, t.allocator, true, "orphan phrase", "gone.zig", null, 1); // drift: path but no confirm
+    emit(&out, t.allocator, true, "no home", null, null, 5); // unattributed
+
+    var rows = try expectNdjson(out.items, 3);
+    defer for (&rows) |*r| r.deinit();
+
+    const located = rows[0].value.object;
+    try t.expectEqualStrings("PHRASE", located.get("text").?.string);
+    try t.expectEqual(@as(i64, 3), located.get("occurrences").?.integer);
+    try t.expectEqualStrings("src.zig", located.get("source").?.string);
+    try t.expectEqual(true, located.get("verified").?.bool);
+    try t.expectEqual(@as(i64, 2), located.get("line").?.integer);
+
+    const drift = rows[1].value.object;
+    try t.expectEqualStrings("gone.zig", drift.get("source").?.string);
+    try t.expectEqual(false, drift.get("verified").?.bool);
+    try t.expectEqual(std.json.Value.null, drift.get("line").?);
+
+    const orphan = rows[2].value.object;
+    try t.expectEqual(std.json.Value.null, orphan.get("source").?);
+    try t.expectEqual(false, orphan.get("verified").?.bool);
+}
+
+test "provenance emit: an adversarial phrase and path survive JSON losslessly" {
+    // Every byte the escaper must handle, in BOTH the phrase (user TEXT) and the
+    // path (a filename) — decoded back through a real parser, they must equal the
+    // input exactly. A missed escape corrupts an agent's provenance answer.
+    const phrase = "quote\" back\\ nl\n tab\t ctl\x01\x1f del\x7f uni\u{00e9}\u{1F980}";
+    const path = "dir/od\"d\\name\n.zig";
+
+    var out: std.ArrayList(u8) = .empty;
+    defer out.deinit(t.allocator);
+    emit(&out, t.allocator, true, phrase, path, null, 2);
+
+    var rows = try expectNdjson(out.items, 1);
+    defer for (&rows) |*r| r.deinit();
+    try t.expectEqualStrings(phrase, rows[0].value.object.get("text").?.string);
+    try t.expectEqualStrings(path, rows[0].value.object.get("source").?.string);
+}
+
+test "provenance emit: the human drift row anchors the file and quotes the phrase" {
+    // `locator`/`anchor` allocate from `gpa` and are never freed (a short-lived
+    // process's contract) — an arena absorbs that so the leak detector stays
+    // quiet while the rendering is still the production path.
+    var arena = std.heap.ArenaAllocator.init(t.allocator);
+    defer arena.deinit();
+    const ga = arena.allocator();
+
+    var out: std.ArrayList(u8) = .empty;
+    emit(&out, ga, false, "a quoted phrase", "path/to/file.zig", null, 1);
+    emit(&out, ga, false, "orphaned", null, null, 1);
+    const bytes = "one\ntwo THREE four\nfive\n";
+    const loc = provenance.verify(bytes, "THREE", 0).?;
+    emit(&out, ga, false, "THREE", "hit.zig", .{ .loc = loc, .bytes = bytes }, 1);
+
+    try t.expect(std.mem.indexOf(u8, out.items, "(drift)") != null);
+    try t.expect(std.mem.indexOf(u8, out.items, "file.zig") != null);
+    try t.expect(std.mem.indexOf(u8, out.items, "\"a quoted phrase\"") != null);
+    try t.expect(std.mem.indexOf(u8, out.items, "(not in corpus)") != null);
+    // The located row indents its own context line under the locator.
+    try t.expect(std.mem.indexOf(u8, out.items, "    two THREE four") != null);
 }
