@@ -1,0 +1,27 @@
+# typos checks authored names and prose; lockfiles are machine output and carry
+# hashes and package spellings nobody here controls. Gitignored sibling caches
+# and build trees are already outside the walk through ignore-vcs.
+
+[files]
+extend-exclude = [
+  "*.lock",
+  "go.sum",
+  "mise.lock",
+]
+
+[default]
+# Public documentation uses US English. Wire identifiers keep their upstream
+# spelling through the narrow lexicon below rather than weakening the locale.
+locale = "en-us"
+extend-ignore-identifiers-re = [
+  # Content hashes and release identifiers are opaque, not words.
+  "^[A-Za-z0-9_-]{20,}$",
+]
+
+[default.extend-words]
+# Public package and algorithm names whose spelling is their API.
+irgx = "irgx"
+libsais = "libsais"
+sljit = "sljit"
+# Memory-mapping jargon used by the substrate and its bindings.
+mmaped = "mmaped"

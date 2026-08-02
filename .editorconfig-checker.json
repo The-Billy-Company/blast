@@ -1,0 +1,47 @@
+{
+  "_meta": [
+    "editorconfig-checker closes the loop on this repository's hand-written .editorconfig.",
+    "Language formatters own exact indentation; this gate owns LF, UTF-8, final newlines,",
+    "trailing whitespace, and tabs-versus-spaces across the files those formatters miss.",
+    "The version is explicit so a stray installation cannot silently change the verdict."
+  ],
+  "Verbose": false,
+  "Debug": false,
+  "IgnoreDefaults": false,
+  "SpacesAfterTabs": false,
+  "NoColor": false,
+  "Version": "v3.8.0",
+  "Exclude": [
+    "/\\.git/",
+    "/\\.venv/",
+    "/\\.zig-cache/",
+    "/__pycache__/",
+    "/\\.ruff_cache/",
+    "/target/",
+    "/zig-out/",
+    "/zig-pkg/",
+    "\\.a$",
+    "\\.lock$",
+    "mise\\.lock$"
+  ],
+  "AllowedContentTypes": [],
+  "PassedFiles": [],
+  "Disable": {
+    "EndOfLine": false,
+    "Indentation": false,
+    "_IndentSize_reason": [
+      "gofmt, rustfmt, ruff, zig fmt, and Taplo understand continuation alignment;",
+      "editorconfig-checker's multiple-of-N rule does not. Keep the style check and",
+      "let each formatter judge width."
+    ],
+    "IndentSize": true,
+    "InsertFinalNewline": false,
+    "TrimTrailingWhitespace": false,
+    "_MaxLineLength_reason": [
+      ".editorconfig declares no universal cap. URLs, prose, and generated command",
+      "lines need language-aware wrapping rather than one integer."
+    ],
+    "MaxLineLength": true,
+    "Charset": false
+  }
+}

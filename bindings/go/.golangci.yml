@@ -1,0 +1,62 @@
+version: "2"
+
+# Four cgo-facing files need correctness checks, not a backend policy borrowed
+# from Chi and pgxpool. Start from none so every enabled analyzer earns its
+# place against this binding's subprocess, row-decoding, and FFI seams.
+run:
+  timeout: 2m
+  go: "1.24"
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - errorlint
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - unconvert
+    - predeclared
+    - wastedassign
+    - copyloopvar
+    - gocheckcompilerdirectives
+    - noctx
+    - gosec
+    - revive
+    - nolintlint
+
+  settings:
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-no-explanation: []
+      allow-unused: false
+    revive:
+      rules:
+        - name: exported
+          arguments: ["disableStutteringCheck"]
+        # A binding package's README carries the package narrative; repeating it
+        # in a doc.go file would create a second copy that can drift.
+        - name: package-comments
+          disabled: true
+
+  exclusions:
+    generated: lax
+    rules:
+      # database/sql reports iteration errors through rows.Err. Close after a
+      # completed read only releases resources; there is no useful error to
+      # return from these deferred cleanup calls.
+      - linters: [errcheck]
+        source: defer .+\.Close\(
+      # Tests intentionally exercise malformed output and missing binaries.
+      - linters: [gosec, noctx]
+        path: _test\.go
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+formatters:
+  enable:
+    - gofmt

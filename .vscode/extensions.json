@@ -1,0 +1,13 @@
+{
+  // One extension per language formatter, plus the two repository-wide text
+  // contracts. Recommendations are conveniences; CI remains the authority.
+  "recommendations": [
+    "charliermarsh.ruff",
+    "davidanson.vscode-markdownlint",
+    "editorconfig.editorconfig",
+    "golang.go",
+    "rust-lang.rust-analyzer",
+    "tamasfe.even-better-toml",
+    "ziglang.vscode-zig"
+  ]
+}

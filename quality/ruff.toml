@@ -1,0 +1,17 @@
+# The Python binding repeats these settings in its package metadata because it
+# must lint correctly when published alone. This root config extends the same
+# contract to tools/version_parity.py; one repository gets one Python dialect.
+line-length = 100
+target-version = "py312"
+# Ruff 0.16 formats Python fences inside Markdown. markdownlint owns those
+# documents; this config judges Python files and leaves prose examples intact.
+extend-exclude = [ "*.md" ]
+
+[lint]
+select = [ "E", "F", "I", "UP", "B", "SIM" ]
+# Ruff's formatter owns wrapping where syntax permits it. URLs, regexes, and
+# command strings remain whole rather than earning per-line suppressions.
+ignore = [ "E501" ]
+
+[lint.isort]
+known-first-party = [ "blast", "gist", "irgx", "relate" ]

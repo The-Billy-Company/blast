@@ -1,35 +1,85 @@
 # Automated dependency updates.
 #
-# One ecosystem, and the omissions are the interesting part.
+# Four manifests, four ecosystems, one weekly window. The bindings are small,
+# which makes a stale dependency easier to miss by eye rather than less costly.
+# Grouped updates keep that vigilance from becoming review-queue noise.
 #
-# The three bindings each resolve their siblings as PATH dependencies - the Go
-# `replace`, the uv sources, and the Rust path dep all spell
-# `../../../irregex/...`. Dependabot runs each update in a sandbox holding only
-# this repository, where those paths do not exist, so a `cargo` / `gomod` / `uv`
-# entry here would not produce careful pull requests: it would produce a
-# recurring resolution error against a manifest that is correct. This package's
-# real third-party surface is the smallest in the ecosystem - it composes two
-# engines and bundles nothing - and what it does depend on moves when they do,
-# which Dependabot DOES watch, in the repositories that can resolve it.
-#
-# Zig is absent because Dependabot has no Zig ecosystem, and because this
-# package's only dependencies are those same siblings.
-#
-# That leaves the one thing here nothing else watches, and the one most worth
-# watching: a compromised action is the supply-chain hole that runs with the
-# repository's own token - and the workflows here hold a token that can read
-# three sibling repositories.
+# Zig remains manual: Dependabot has no Zig ecosystem, and the package graph is
+# three sibling checkouts whose release pins must move with tested source.
 version: 2
 
 updates:
+  # A compromised action runs with this repository's token and, in build jobs,
+  # a token that can read the three sibling repositories.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ["*"]
     commit-message:
       prefix: "ci"
     labels: ["dependencies", "ci"]
+
+  # The binding's direct crate is local; tempfile and the transitive graph are
+  # still registry dependencies and deserve the same weekly review.
+  - package-ecosystem: cargo
+    directory: /bindings/rust
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      rust:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build"
+    labels: ["dependencies", "rust"]
+
+  # The toolchain is a separate authority from Cargo dependencies. Monthly is
+  # deliberate; a compiler bump can reshape rustfmt and Clippy together.
+  - package-ecosystem: rust-toolchain
+    directory: /bindings/rust
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "build"
+    labels: ["dependencies", "rust"]
+
+  # There are no third-party Go requires today. Keeping the updater present
+  # catches the day that stops being true and keeps the declared Go floor live.
+  - package-ecosystem: gomod
+    directory: /bindings/go
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      go:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build"
+    labels: ["dependencies", "go"]
+
+  # Runtime stays stdlib-thin; this watches the development tools and uv.lock.
+  - package-ecosystem: uv
+    directory: /bindings/python
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      python:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build"
+    labels: ["dependencies", "python"]

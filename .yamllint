@@ -1,0 +1,47 @@
+# Eight GitHub-owned YAML files carry the repository's whole automation plane.
+# Hard-error on structure; leave GitHub's compact maps and long shell lines
+# alone where wrapping would make the workflow harder to read.
+---
+extends: default
+
+ignore: |
+  **/.venv/**
+  **/build/**
+  **/dist/**
+  **/zig-out/**
+
+rules:
+  # Workflow scripts and issue-form prose are often one semantic line.
+  line-length:
+    max: 200
+    level: warning
+    allow-non-breakable-words: true
+
+  # GitHub examples conventionally omit the document marker.
+  document-start: disable
+
+  # `on` is a workflow key, not YAML 1.1 boolean syntax.
+  truthy:
+    allowed-values: ["true", "false", "on", "off"]
+    check-keys: false
+
+  comments:
+    require-starting-space: true
+    min-spaces-from-content: 1
+  comments-indentation: disable
+
+  braces:
+    max-spaces-inside: 1
+  brackets:
+    max-spaces-inside: 1
+  indentation:
+    spaces: consistent
+    indent-sequences: consistent
+
+  key-duplicates: enable
+  trailing-spaces: enable
+  new-lines: enable
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1

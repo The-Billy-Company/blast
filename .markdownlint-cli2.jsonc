@@ -1,0 +1,56 @@
+{
+  // Markdown is the largest authored surface in this repository. Keep the file
+  // set automatic: gitignored dependency checkouts and build output stay out,
+  // while every new tracked page enters the gate without another path list.
+  "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/v0.23.0/schema/markdownlint-cli2-config-schema.json",
+  "gitignore": true,
+  "globs": ["**/*.md"],
+  "ignores": [
+    // towncrier assembles this one from changelog.d, and the fragments it
+    // consumes are deleted at release. So a style fix applied here can never
+    // reach the thing that wrote it, and the next release re-imports whatever
+    // the new fragments happened to use. Lint the source instead: the glob
+    // above already covers changelog.d/*.md, which is where news is authored.
+    "CHANGELOG.md"
+  ],
+  "config": {
+    // There is no Prettier here. markdownlint owns layout, so the Prettier
+    // compatibility preset used in Billy would switch off the useful rules.
+    "default": true,
+    "MD004": { "style": "consistent" },
+    // Prose, links, tables, and release fragments routinely exceed a flat
+    // column cap. Structural Markdown rules still judge the document.
+    "MD013": false,
+    // Towncrier fragments and the pull request template are document parts,
+    // not standalone pages; requiring an H1 would corrupt their rendered form.
+    "MD041": false,
+    // Release notes may repeat a heading beneath different versions.
+    "MD024": { "siblings_only": true },
+    "MD025": false,
+    // Lazy numbering keeps reordered procedures readable in source.
+    "MD029": false,
+    // The public docs use a small, reviewable HTML vocabulary where Markdown
+    // has no equivalent, chiefly disclosure blocks and responsive images.
+    "MD033": {
+      "allowed_elements": [
+        "a",
+        "br",
+        "details",
+        "div",
+        "img",
+        "kbd",
+        "p",
+        "picture",
+        "source",
+        "span",
+        "strong",
+        "sub",
+        "summary",
+        "sup"
+      ]
+    },
+    // Compact tables are intentional in tiny package READMEs. Column count
+    // remains checked; forcing one pipe-spacing style would only churn them.
+    "MD060": false
+  }
+}

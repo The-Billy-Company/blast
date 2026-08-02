@@ -14,7 +14,7 @@ something else. Every one of those is input.
 
 Use GitHub's private reporting - the **Security** tab on this repository,
 "Report a vulnerability" - which opens a thread only the maintainers can read.
-If that is unavailable to you, email **security@billylives.com**.
+If that is unavailable to you, email **<security@billylives.com>**.
 
 Please include:
 
@@ -43,7 +43,7 @@ next release; there are no maintained release branches and no backports to
 earlier tags. Watch releases on this repository if you pin.
 
 This package contains neither engine, so a great deal of what could go wrong
-belongs to a neighbour with its own policy: [`irregex`][irregex] owns the regex
+belongs to a neighbor with its own policy: [`irregex`][irregex] owns the regex
 engines, the corpus walk, and the FM-index; [`relate`][relate] owns kinship, the
 codex shelf, and the compose kernels; [`gist`][gist] owns argv, the resident
 daemon, and the answer keep. Any tracker reaches us, and we will move a report
@@ -92,10 +92,10 @@ rather than bounce you.
   one that stopped at a directory would lie - so a big tree costs more than a
   small one. That is arithmetic, and `--budget` is the knob.
 - **A twin you disagree with.** `tangential.twins` is compression kin, offered as
-  co-edit risk rather than as a call graph. It is labelled tangential because it
+  co-edit risk rather than as a call graph. It is labeled tangential because it
   is a guess. A bad one is a quality report, with the corpus.
 - **`provenance` needing a shelf.** It reads the corpus-wide codex shelf and
-  says so when there is not one. Refusing to answer is the correct behaviour.
+  says so when there is not one. Refusing to answer is the correct behavior.
 - **The daemon obeying the user who started it.** Same-user access is the
   design, not a hole.
 

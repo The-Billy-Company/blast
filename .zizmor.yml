@@ -1,0 +1,29 @@
+# GitHub Actions is this repository's only CI plane. zizmor checks the part a
+# YAML parser cannot: token persistence, template injection, unsafe triggers,
+# cache poisoning, and action provenance.
+rules:
+  excessive-permissions:
+    remap:
+      severity: high
+  cache-poisoning:
+    remap:
+      severity: high
+
+  dependabot-cooldown:
+    config:
+      days: 7
+
+  # Tags can be rewritten. Every remote action is pinned to the commit behind
+  # its release tag and carries that tag as a reviewable trailing comment.
+  unpinned-uses:
+    config:
+      policies:
+        "*": hash-pin
+
+  # These publishers have had action supply-chain incidents. A hash pin limits
+  # tag movement; the denylist prevents introducing the compromised surface.
+  forbidden-uses:
+    config:
+      deny:
+        - reviewdog/*
+        - tj-actions/*

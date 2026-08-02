@@ -36,7 +36,7 @@ relate's own manifest then points at `../irregex` and `../gist`, and the build
 installs `../gist/include/gist.h` beside this package's header. Clone all four
 as siblings:
 
-```
+```text
 Billy-Company/
 ├── irregex/     ← the engine
 ├── gist/        ← the chassis; relate needs it, and the header install does
@@ -57,6 +57,7 @@ actually clone.
 | the Python binding | [uv](https://docs.astral.sh/uv/) | `requires-python` floor 3.12 |
 | the Rust binding | rustup | `bindings/rust/rust-toolchain.toml` |
 | the Go binding | Go | `bindings/go/go.mod` |
+| the discipline gate | markdownlint-cli2, typos, golangci-lint | the actions in [`ci.yml`](.github/workflows/ci.yml), mirrored into `.mise.toml` |
 | coverage | kcov | only for `zig build coverage`, a local instrument |
 
 If you run [mise](https://mise.jdx.dev), that table is one command:
@@ -132,19 +133,24 @@ missing scope is a typed refusal. Neither opens a file.
 
 ## What CI will check
 
-Five jobs in [`.github/workflows/ci.yml`](.github/workflows/ci.yml), split on
-purpose - a Zig engine regression and a Rust clippy nit are different news and
-deserve different red Xs. What this repository adds over its siblings is the
-first step of almost every job: assembling the ecosystem on disk before anything
-can even configure.
+Ten jobs in [`.github/workflows/ci.yml`](.github/workflows/ci.yml), split on
+purpose - a Zig engine regression, malformed Markdown, and a poisoned workflow
+are different news and deserve different red Xs. Runtime jobs assemble the
+ecosystem on disk; static discipline jobs read this checkout alone and fail
+before a build would matter.
 
 | Job | What it holds |
 | --- | --- |
 | `engine` | `zig build check`, `test`, and the full install on Linux and macOS |
 | `python` | three interpreters against one ecosystem build - 3.12, 3.13, 3.14 |
-| `go` | `go vet` and `go test`, then a grep proving no test skipped itself |
-| `rust` | fmt, clippy, and tests; the one job that needs no Zig |
+| `go` | golangci-lint, `go vet`, and `go test`, then proof no test skipped |
+| `rust` | fmt, clippy, tests, and `cargo deny` over advisories, bans, licenses, and sources; the one job that needs no Zig |
 | `fmt` | `zig fmt --check` over every tracked and untracked-not-ignored `.zig` file |
+| `docs` | markdownlint over every page, plus US-English typo checking |
+| `config` | yamllint, Taplo lint/format, and `.editorconfig` conformance |
+| `python-lint` | Ruff lint and format over the binding and maintenance tools |
+| `actions-sec` | zizmor over workflows and Dependabot configuration |
+| `version` | every published manifest still agrees with `build.zig.zon` |
 
 Run the formatter before you push - `zig fmt` reflows column-aligned literals,
 so a rename that shrinks the widest cell leaves rows you never touched one space
@@ -202,7 +208,7 @@ onto the release branch - the tag and the notes should land together.
 Commit subjects here are a conventional prefix plus a lowercase sentence that
 says what changed, in the voice of the change rather than the ticket:
 
-```
+```text
 fix: the binary signs its own name
 feat: libblast and the blast binary
 ci: the workflow fetches what blast composes

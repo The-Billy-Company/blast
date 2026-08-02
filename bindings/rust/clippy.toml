@@ -1,0 +1,9 @@
+# Cargo.toml owns lint levels; this file only tunes Clippy's judgment. The crate
+# supports Rust 1.85 even though rust-toolchain.toml pins 1.96 for contributors,
+# so suggestions must stay usable by downstream callers at the declared floor.
+msrv = "1.85"
+
+# Test helpers can graduate into the public builder API. Check them against the
+# same floor instead of letting the pinned development toolchain hide a newer
+# call until release.
+check-incompatible-msrv-in-tests = true

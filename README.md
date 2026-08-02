@@ -82,6 +82,7 @@ that stopped at a directory would lie), so it defaults to the whole CWD corpus,
 narrowable with `ROOT...`. The narrowing questions moved to `relate`, where
 `--matching` requires `ROOT...` or an explicit `--all` — a composed query can
 never silently sweep `vendor/`/`upstream/`.
+
 ## Layout
 
 One tier: [`src/surface/face/blast/`](src/surface/face/blast/) - the
