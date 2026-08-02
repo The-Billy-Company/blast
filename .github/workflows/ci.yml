@@ -317,3 +317,18 @@ jobs:
           fi
           echo "checking ${#files[@]} files"
           zig fmt --check "${files[@]}"
+
+  version:
+    # One number lives in `build.zig.zon`; the publishing manifests that cannot
+    # import it — Cargo and PyPI — carry a marked copy the release bot rewrites.
+    # This asks whether those copies still agree, and whether the bot has been
+    # told about every one of them. A mirror the config forgot is the
+    # interesting failure: nothing breaks until a release ships a package
+    # claiming last version's number.
+    #
+    # Stdlib-only, no Zig and no build — it reads lines.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv run --no-project --python 3.12 python tools/version_parity.py

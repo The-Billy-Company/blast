@@ -41,16 +41,33 @@ pub fn build(b: *std.Build) void {
         .{ .name = "relate", .module = b.dependency("relate", opts).module("relate") },
     };
 
+    // ── the one place this package's semver lives ──
+    // `build.zig.zon`'s `.version` is the single authority; the face reads it
+    // through this option instead of restating it, so `blast --version` and the
+    // `--schema` manifest answer with THIS package's number rather than the
+    // engine's. Every remaining copy is a publishing manifest that cannot import
+    // anything (Cargo, PyPI); those carry an `x-release-please-version` marker
+    // and are moved by the release bot, with `tools/version_parity.py` failing
+    // if one of them lags.
+    //
+    // The package name rides along so this generated file differs from the ones
+    // the siblings generate. Zig content-addresses it, and two packages whose
+    // only option was an identical version string produced the SAME file — which
+    // it then refuses as the root of two modules.
+    const zon = @import("build.zig.zon");
+    const version = b.addOptions();
+    version.addOption([:0]const u8, "version", zon.version);
+    version.addOption([:0]const u8, "package", @tagName(zon.name));
+
     const root = b.path("src/surface/face/blast/main.zig");
-    const exe = b.addExecutable(.{
-        .name = "blast",
-        .root_module = b.createModule(.{
-            .root_source_file = root,
-            .target = target,
-            .optimize = optimize,
-            .imports = &deps,
-        }),
+    const face = b.createModule(.{
+        .root_source_file = root,
+        .target = target,
+        .optimize = optimize,
+        .imports = &deps,
     });
+    face.addOptions("build_options", version);
+    const exe = b.addExecutable(.{ .name = "blast", .root_module = face });
     b.installArtifact(exe);
 
     // ── the C-ABI dual artifact ──
@@ -101,14 +118,14 @@ pub fn build(b: *std.Build) void {
         .{ .name = "irregex", .module = irgx_dep.module("irregex") },
         .{ .name = "relate", .module = b.dependency("relate", .{ .target = target, .optimize = .Debug }).module("relate") },
     };
-    const tests = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = root,
-            .target = target,
-            .optimize = .Debug,
-            .imports = &test_deps,
-        }),
+    const test_face = b.createModule(.{
+        .root_source_file = root,
+        .target = target,
+        .optimize = .Debug,
+        .imports = &test_deps,
     });
+    test_face.addOptions("build_options", version);
+    const tests = b.addTest(.{ .root_module = test_face });
     const ffi_tests = b.addTest(.{
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/surface/ffi/analytic.zig"),

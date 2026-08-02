@@ -34,10 +34,18 @@ const relate = @import("relate");
 /// binary reads the index, atlas, and shelf the siblings write.
 pub const irgx_brand: irregex.Brand = .{ .name = "blast" };
 
+/// This package's semver, read from `build.zig.zon`'s `.version` — the single
+/// place it is written. `build.zig` lifts it in as a build option, so
+/// `blast --version` and the `--schema` manifest answer with this binary's own
+/// number. They used to answer with the engine's, which is a different axis and
+/// a different schedule: the manifest read 1.0.0 while this package was 0.1.0.
+/// `irregex.version_string` is still how you ask what is underneath.
+pub const version_string: [:0]const u8 = @import("build_options").version;
+
 pub fn main(init: std.process.Init) void {
     relate.cli.manifest.drive(
         @import("repertoire.zig").face,
-        irregex.version_string,
+        version_string,
         init,
     );
 }
