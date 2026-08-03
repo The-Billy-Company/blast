@@ -1,0 +1,4 @@
+github.com/The-Billy-Company/irregex/bindings/go v1.0.0 h1:B2qUji188td8T/s7Xa5J4bhA6RmQj5U+xdY/OiV1b8I=
+github.com/The-Billy-Company/irregex/bindings/go v1.0.0/go.mod h1:X6paldXs28fSzVMonTzGiefg8vW5XqNSZlTSoJ7s0M0=
+github.com/The-Billy-Company/relate/bindings/go v1.0.0 h1:pYMrUW3qRikgEAZm+7eyNEBFaV11U0QhJI4sV0PyF6s=
+github.com/The-Billy-Company/relate/bindings/go v1.0.0/go.mod h1:viBHaEERtkmQ87yJojBJNb3eoFDYXQR5SeybAoHdZQc=
