@@ -16,7 +16,7 @@
 
 [project]
 name = "blast-search"
-version = "0.1.0"                                                                                                                                                                   # x-release-please-version
+version = "1.0.0"                                                                                                                                                                   # x-release-please-version
 description = "Blast-radius and provenance analysis for Python - what breaks if I change this symbol, and where a pasted snippet came from, read from the bytes on disk right now."
 # The long description is the repository's own README, lifted and link-corrected
 # at build time by `hatch_readme.py`. PyPI opens onto the project's front door,
@@ -60,7 +60,7 @@ dependencies = [
   # to move both. blast composes relate's kinship verbs the same way, so its
   # requirement is bounded for the same reason and at its own version.
   "irregex>=1.0.0,<2",
-  "relate-search>=0.1.0,<2",
+  "relate-search>=1.0.0,<2",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
