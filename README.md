@@ -94,6 +94,23 @@ The binary is standalone for the `blast` verb. `provenance` additionally reads
 the codex shelf that relate writes, so install
 [relate](https://github.com/The-Billy-Company/relate) if you want attribution.
 
+The language bindings are published, and each drives that same binary rather
+than reimplementing it, so the CLI is a prerequisite for all three:
+
+| | Install | You write |
+|---|---|---|
+| Python | `pip install blast-search` | `import blast` |
+| Rust | `cargo add blast-search` | `use blast::…` |
+| Go | `go get github.com/The-Billy-Company/blast/bindings/go` | `import ".../bindings/go/compose"` |
+
+The bare name `blast` was taken on both PyPI and crates.io and names there are
+permanent, so the distribution carries the `-search` suffix while the identifier
+you type stays `blast` — the bs4 / PIL split. All three pull the shared
+substrate, which is `irregex` on PyPI and `irgx` on crates.io. Per-language
+detail is in [`bindings/python`](bindings/python/README.md),
+[`bindings/rust`](bindings/rust/README.md), and
+[`bindings/go`](bindings/go/README.md).
+
 ## Reading a Report
 
 A report has six sections, and they are ordered by how likely you are to have

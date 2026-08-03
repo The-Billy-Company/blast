@@ -16,6 +16,10 @@ The distribution is `blast-search`; the import stays `blast`. The bare name on
 PyPI belongs to an unrelated author, so this is the same split bs4, PIL, and
 cv2 already ship.
 
+This package is the bindings, not the engine: every verb answers by running the
+`blast` binary, so that has to be on `PATH` (or `$BLAST_BIN`). Without it the
+first call raises `GistNotFoundError` rather than failing quietly.
+
 ## Blast radius
 
 ```python
