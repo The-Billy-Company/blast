@@ -3,7 +3,10 @@
 # The smallest release in the ecosystem, which is what being a composed face
 # means: this package carries no engine, so it needs no wheel matrix. One
 # `py3-none-any` wheel covers every platform, and an sdist is genuinely
-# buildable because the project is self-contained under `bindings/python`.
+# buildable because the project is self-contained under `bindings/python`. The
+# one thing it reaches up for is the repository README, which is the long
+# description — so the sdist carries a corrected copy and a source build reads
+# that.
 #
 # The distribution is `blast-search`; the import stays `blast`. The plain
 # `blast` name on PyPI belongs to an unrelated author, so publishing under it is
