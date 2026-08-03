@@ -1,7 +1,7 @@
 # blast: A Blast Radius Tool for Coding Agents
 
 - [Overview](#overview)
-- [Should I Be Using This?](#should-i-be-using-this)
+- [Why this over grep?](#why-this-over-grep)
 - [Support](#support)
 - [Install](#install)
 - [Reading a Report](#reading-a-report)
