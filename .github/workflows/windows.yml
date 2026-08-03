@@ -1,0 +1,128 @@
+# Native Windows is a runtime contract, not a cross-compilation claim. This
+# lane exercises the composed CLI and its installer on both supported Windows
+# architectures with the complete sibling stack assembled beside it.
+name: windows
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ZIG_VERSION: 0.16.0
+
+jobs:
+  native:
+    name: native (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            zig_arch: x86_64
+            runner: windows-2025
+          - arch: arm64
+            zig_arch: aarch64
+            runner: windows-11-arm
+    defaults:
+      run:
+        working-directory: blast
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: blast
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: The-Billy-Company/irregex
+          path: irregex
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: The-Billy-Company/gist
+          path: gist
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: The-Billy-Company/relate
+          path: relate
+          persist-credentials: false
+
+      - name: Provision Zig
+        shell: pwsh
+        run: |
+          $ver = $env:ZIG_VERSION
+          $floor = Select-String -Path build.zig.zon -Pattern '\.minimum_zig_version = "([^"]+)"'
+          if (-not $floor) { throw 'no minimum_zig_version in build.zig.zon' }
+          $declared = $floor.Matches[0].Groups[1].Value
+          if ($declared -ne $ver) { throw "workflow pins zig $ver, build.zig.zon declares $declared" }
+
+          $target = '${{ matrix.zig_arch }}-windows'
+          $index = Invoke-RestMethod -Uri 'https://ziglang.org/download/index.json'
+          $release = $index.$ver
+          if (-not $release) { throw "ziglang.org carries no $ver release" }
+          $build = $release.$target
+          if (-not $build) { throw "zig $ver has no $target build" }
+
+          $zip = Join-Path $env:RUNNER_TEMP 'zig.zip'
+          Invoke-WebRequest -Uri $build.tarball -OutFile $zip
+          $got = (Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLower()
+          if ($got -ne $build.shasum) { throw "sha256 mismatch: got $got, expected $($build.shasum)" }
+
+          $into = Join-Path $env:RUNNER_TEMP 'zig'
+          Expand-Archive -LiteralPath $zip -DestinationPath $into -Force
+          $root = (Get-ChildItem -Directory -LiteralPath $into | Select-Object -First 1).FullName
+          if (-not $root) { throw "the archive extracted no directory into $into" }
+          Add-Content -LiteralPath $env:GITHUB_PATH -Value $root
+          if ((& (Join-Path $root 'zig.exe') version) -ne $ver) { throw 'provisioned Zig reports the wrong version' }
+
+      - name: Test and build shipped artifacts
+        run: |
+          zig build test
+          zig build -Doptimize=ReleaseFast
+
+      - name: CLI smoke
+        shell: pwsh
+        run: |
+          $blast = Join-Path (Get-Location) 'zig-out\bin\blast.exe'
+          if (-not (Test-Path -LiteralPath $blast)) { throw "no blast.exe at $blast" }
+
+          $schema = & $blast --schema | ConvertFrom-Json
+          if ($schema.tool -ne 'blast' -or -not $schema.version) { throw 'blast --schema carried no tool identity' }
+
+          $report = & $blast blast main --budget 256 --json src | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw "blast query exited $LASTEXITCODE" }
+          if (-not $report.seed) { throw 'blast query carried no seed' }
+
+      - name: Installer is idempotent
+        shell: pwsh
+        run: |
+          $prefix = Join-Path $env:RUNNER_TEMP 'blast-bin'
+          ./install.ps1 -Prefix $prefix
+          if ($LASTEXITCODE -ne 0) { throw "install.ps1 exited $LASTEXITCODE" }
+          ./install.ps1 -Prefix $prefix
+          if ($LASTEXITCODE -ne 0) { throw "second install.ps1 exited $LASTEXITCODE" }
+
+          $installed = Join-Path $prefix 'blast.exe'
+          if (-not (Test-Path -LiteralPath $installed)) { throw 'installer did not place blast.exe' }
+          & $installed --version
+          if ($LASTEXITCODE -ne 0) { throw "installed blast.exe exited $LASTEXITCODE" }
+
+  required:
+    name: native
+    if: always()
+    needs: [native]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          test '${{ needs.native.result }}' = success

@@ -1,0 +1,1 @@
+Windows is now a first-class runtime target. `install.ps1` builds and places `blast.exe` on the per-user PATH without elevation and can be rerun safely. Native x64 and arm64 CI assemble all four sibling repositories, execute the Zig suite and a composed query, and exercise the installer instead of treating a cross-compile as runtime evidence.

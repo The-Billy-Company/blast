@@ -152,6 +152,10 @@ before a build would matter.
 | `actions-sec` | zizmor over workflows and Dependabot configuration |
 | `version` | every published manifest still agrees with `build.zig.zon` |
 
+The separate [`windows`](.github/workflows/windows.yml) workflow runs the Zig
+suite, composed CLI smoke, and idempotent installer on native x64 and arm64
+Windows. Cross-compilation is not treated as runtime evidence.
+
 Run the formatter before you push - `zig fmt` reflows column-aligned literals,
 so a rename that shrinks the widest cell leaves rows you never touched one space
 too wide:

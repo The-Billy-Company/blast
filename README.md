@@ -83,6 +83,13 @@ Build from source with a Zig toolchain, or take the CLI from a release.
 zig build            # blast → zig-out/bin/blast
 ```
 
+On Windows, the installer builds `blast.exe`, places it in a per-user directory,
+and adds that directory to the user PATH without elevation:
+
+```powershell
+.\install.ps1
+```
+
 The binary is standalone for the `blast` verb. `provenance` additionally reads
 the codex shelf that relate writes, so install
 [relate](https://github.com/The-Billy-Company/relate) if you want attribution.
