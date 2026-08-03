@@ -1,7 +1,7 @@
 name: Wrong radius or provenance
 description: blast missed something it should have found, or claimed something untrue.
 title: "answer: "
-labels: ["answer"]
+labels: ["topic/answer"]
 body:
   - type: markdown
     attributes:

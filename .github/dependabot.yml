@@ -23,7 +23,7 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "ci"
-    labels: ["dependencies", "ci"]
+    labels: ["type/deps", "area/ci"]
 
   # The binding's direct crate is local; tempfile and the transitive graph are
   # still registry dependencies and deserve the same weekly review.
@@ -39,7 +39,7 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "build"
-    labels: ["dependencies", "rust"]
+    labels: ["type/deps", "area/bindings", "lang/rust"]
 
   # The toolchain is a separate authority from Cargo dependencies. Monthly is
   # deliberate; a compiler bump can reshape rustfmt and Clippy together.
@@ -51,7 +51,7 @@ updates:
       default-days: 7
     commit-message:
       prefix: "build"
-    labels: ["dependencies", "rust"]
+    labels: ["type/deps", "area/bindings", "lang/rust"]
 
   # There are no third-party Go requires today. Keeping the updater present
   # catches the day that stops being true and keeps the declared Go floor live.
@@ -67,7 +67,7 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "build"
-    labels: ["dependencies", "go"]
+    labels: ["type/deps", "area/bindings", "lang/go"]
 
   # Runtime stays stdlib-thin; this watches the development tools and uv.lock.
   - package-ecosystem: uv
@@ -82,4 +82,4 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "build"
-    labels: ["dependencies", "python"]
+    labels: ["type/deps", "area/bindings", "lang/python"]
