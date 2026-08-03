@@ -1,1 +1,0 @@
-Lowered the Go module floor from `go 1.26.3` to `go 1.24`, matching the other three packages. The higher floor existed only for `new(0.6)` — Go 1.26 sugar for the address of a literal — in the compose suite's optional-knob fixtures; a small `ptr[T any]` helper replaces it. No production file needed anything past 1.24.
