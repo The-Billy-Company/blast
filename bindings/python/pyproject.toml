@@ -18,7 +18,10 @@
 name = "blast-search"
 version = "0.1.0"                                                                                                                                                                   # x-release-please-version
 description = "Blast-radius and provenance analysis for Python - what breaks if I change this symbol, and where a pasted snippet came from, read from the bytes on disk right now."
-readme = "README.md"
+# The long description is the repository's own README, lifted and link-corrected
+# at build time by `hatch_readme.py`. PyPI opens onto the project's front door,
+# not onto a second one kept beside this file.
+dynamic = [ "readme" ]
 requires-python = ">=3.12"
 license = "Apache-2.0"
 authors = [ { name = "The Billy Company" } ]
@@ -90,6 +93,12 @@ Changelog = "https://github.com/The-Billy-Company/blast/blob/main/CHANGELOG.md"
 requires = [ "hatchling" ]
 build-backend = "hatchling.build"
 
+[tool.hatch.metadata.hooks.custom]
+path = "hatch_readme.py"
+
+[tool.hatch.build.targets.sdist.hooks.custom]
+path = "hatch_readme.py"
+
 [tool.hatch.build.targets.wheel]
 packages = [ "blast" ]
 
@@ -102,6 +111,9 @@ relate-search = { path = "../../../relate/bindings/python", editable = true }
 dev = [
   "pytest>=9.0",
   "ruff>=0.15",
+  # The build backend, here because `test_description.py` drives the metadata
+  # hook that decides what PyPI shows.
+  "hatchling>=1.27",
   # distribution `gist-search`, import `gist` — the bare name was taken on PyPI.
   "gist-search", # oracle face for exact-search checks in behavioral tests
 ]
