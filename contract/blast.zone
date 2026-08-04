@@ -6,7 +6,7 @@
 // (`libblast` / `blast_run`). The engines are sibling modules (`irregex` ·
 // `relate` · `gist`) reached only through `@import(...)` — a file import
 // cannot cross a package boundary — so the whole package is a thin face, a
-// thin FFI, and a correspondingly small contract. Judged by `ward verify`.
+// thin FFI, and a correspondingly small contract. Judged by `zoning verify`.
 
 package blast {
     // The face is the exe facade. `exports.zig` under ffi is a second root —
@@ -18,7 +18,7 @@ package blast {
 }
 
 // Tiers, low to high. An import may only point back up the page.
-tiers {
+zones {
     // C-ABI producer — `blast_run` over the four composed verbs. Declines
     // in-process today (`.stale` → CLI fallback); the point of the tier is
     // that a host links `libblast` for compose and `librelate` for kinship,

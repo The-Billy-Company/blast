@@ -316,7 +316,7 @@ is deliberately small: this package is a face over engines that carry their own
 much larger suites, so most of blast's behavior is proven underneath it.
 
 The package's import topology is machine-checked by
-[`contract/blast.ward`](contract/blast.ward), which allows two hops of reach
+[`contract/blast.zone`](contract/blast.zone), which allows two hops of reach
 and no more. The face lives in
 [`src/surface/face/blast/`](src/surface/face/blast/) and imports everything
 else: irregex for engines, corpus, and argv; relate for kinship, the shelf, and

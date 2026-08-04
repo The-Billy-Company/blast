@@ -127,9 +127,9 @@ missing scope is a typed refusal. Neither opens a file.
   declare; a definition list in prose or a key in a spec is a mention. A change
   that lets a weak shape win because it sorted first alphabetically is a
   regression even if every test still passes.
-- **Two hops of reach, and no more.** [`contract/blast.ward`](contract/blast.ward)
+- **Two hops of reach, and no more.** [`contract/blast.zone`](contract/blast.zone)
   is the shortest contract in the ecosystem and should stay that way. If your
-  change wants a third tier, the work probably belongs in one of the engines.
+  change wants a third zone, the work probably belongs in one of the engines.
 
 ## What CI will check
 
@@ -235,9 +235,9 @@ grows two spellings of the same bug.
 
 Zig has no visibility rules between files in a package, so every boundary the
 READMEs describe would be convention.
-[`contract/blast.ward`](contract/blast.ward) is the machine-checkable half. If
+[`contract/blast.zone`](contract/blast.zone) is the machine-checkable half. If
 your change needs a new import edge, edit the contract in the same commit and
-say why in the exception. Do not route around it.
+say why in the variance. Do not route around it.
 
 The seam has the same property.
 [`contract/compose.toml`](contract/compose.toml) declares the candidate set, the

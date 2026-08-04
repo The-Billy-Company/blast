@@ -110,7 +110,7 @@ kind of report we want:
 - the full install path runs on Linux and macOS both, because linking
   `libblast` against `libirgx` and staging the headers is where the two hosts
   disagree;
-- an architecture contract ([`contract/blast.ward`](contract/blast.ward)) that
+- an architecture contract ([`contract/blast.zone`](contract/blast.zone)) that
   machine-checks the import topology, and a seam contract
   ([`contract/compose.toml`](contract/compose.toml)) that declares the scoring
   split this face is not allowed to blur.
