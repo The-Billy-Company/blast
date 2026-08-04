@@ -33,6 +33,24 @@ zones {
     face    surface/face/**
 }
 
+// Reach outside the package: the modules the build graph hands us.
+//
+// This package is the smallest of the four and its whole job is composition, so
+// the list below is nearly the whole package: two engines, and the options the
+// build injects. `std`, `builtin` and `root` are the language's, granted
+// without asking.
+
+// The exact engine — corpus, query, the FM-index shelf. Both tiers reach it.
+use irregex
+
+// The kinship engine. Only the face composes the two; the ABI plane declines
+// in-process today and falls back to the CLI, so it needs no kinship of its own.
+use relate by face
+
+// The version string, injected by `b.addOptions`, read where the manifest
+// renders it.
+use build_options by face
+
 // Guest lists: regions only the named importers may reach at all.
 
 // The face is this package's one product surface for Zig. Nothing else in
