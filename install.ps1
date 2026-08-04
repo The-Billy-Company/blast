@@ -72,7 +72,9 @@ if (-not $zig) {
 Write-Host 'building blast...'
 Push-Location $root
 try {
-    & $zig.Source build
+    $buildArgs = @('build', '-Doptimize=ReleaseFast')
+    if ($env:ZIG_TARGET) { $buildArgs += "-Dtarget=$env:ZIG_TARGET" }
+    & $zig.Source @buildArgs
     if ($LASTEXITCODE -ne 0) { throw "zig build exited $LASTEXITCODE" }
 } finally {
     Pop-Location
