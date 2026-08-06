@@ -43,7 +43,7 @@ def _binary_available() -> bool:
 
 needs_irregex = pytest.mark.skipif(not _binary_available(), reason="no blast binary")
 
-_LEDGER = '''"""The wallet ledger."""
+_LEDGER = '''"""The Acme ledger."""
 
 
 def reconcile_ledger(entries, charge_id):
@@ -58,7 +58,7 @@ def reconcile_ledger(entries, charge_id):
 # The same skeleton, renamed vocabulary — a Type-2 clone. File kinship would miss
 # it inside an otherwise-different module; `unit="function"` lifts each hit to its
 # enclosing function first.
-_INVOICE = '''"""Invoice math, unrelated to wallets except in shape."""
+_INVOICE = '''"""Invoice math, unrelated to Acme except in shape."""
 
 
 def reconcile_invoices(rows, invoice_no):

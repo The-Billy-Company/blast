@@ -221,7 +221,7 @@ report, and no signal here can hide a match.
 Ask what a rename would touch, before you rename anything.
 
 ```bash
-blast WalletService
+blast AcmeService
 ```
 
 Narrow to one subtree when you already know the change is local. Scope is

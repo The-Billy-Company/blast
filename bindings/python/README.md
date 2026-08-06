@@ -25,7 +25,7 @@ first call raises `GistNotFoundError` rather than failing quietly.
 ```python
 import blast
 
-radius = blast.blast("SessionStore")
+radius = blast.blast("AcmeStore")
 
 print(radius.symbol, radius.kind)
 for site in radius.definitions:
@@ -54,7 +54,7 @@ contained, and use `budget` as a soft cap that trims the lowest-priority tail
 into `stats.omitted` rather than silently truncating.
 
 ```python
-radius = blast.blast("SessionStore", roots=["services/backend"], budget=4000)
+radius = blast.blast("AcmeStore", roots=["services/backend"], budget=4000)
 if radius.stats.omitted:
     print("trimmed", radius.stats.omitted)
 ```
