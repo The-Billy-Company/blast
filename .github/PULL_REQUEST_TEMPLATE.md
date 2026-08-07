@@ -58,5 +58,5 @@ of the same bug.
 - [ ] A news fragment is in `changelog.d/` (`+<slug>.<type>.md`), unless this is
       comment-only, format-only, or genuinely invisible
 - [ ] Exact and statistical evidence are still in separate fields
-- [ ] `contract/blast.ward` is updated in this PR if a new import edge was
+- [ ] `charter.zone` is updated in this PR if a new import edge was
       needed, and `contract/compose.toml` if the seam moved

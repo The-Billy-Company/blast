@@ -1,0 +1,59 @@
+// blast-search — import topology of the Python binding.
+//
+// The wheel is not the engine. Every verb here answers by running the `blast`
+// binary and decoding what it prints, so this package is a decode layer and a
+// pair of dataclasses — the same two questions the CLI exposes (`blast` ·
+// `provenance`), reached from Python. That is why the contract is small and why
+// the only real law in it is that the shape stays a stack: build hooks below,
+// the importable package above them, tests on top of both.
+//
+// Judged by `zoning verify` under the `python` dialect, from the repository
+// root, alongside `charter.zone` (the Zig side).
+
+package blast-search {
+    root     .
+    language python
+}
+
+// Tiers, low to high. An import may only point back up the page.
+zones {
+    // The wheel's build hooks — `hatch_readme.py` rewrites the PyPI long
+    // description at build time. It runs under hatchling and never under the
+    // package, so it sits at the bottom and imports nothing of ours.
+    packaging  *.py
+
+    // The importable surface: `blast.blast` (live blast radius) and
+    // `blast.provenance` (quote attribution re-verified against current
+    // bytes), over the shared `irgx` runtime.
+    binding    blast/**
+
+    // Behavioral tests. They drive the binding the way a caller does, and pull
+    // `gist` purely as an independent oracle.
+    tests      tests/**
+}
+
+// Reach outside the package: the distributions the wheel declares.
+
+// The C-ABI floor's Python side — the shell runner, the decode table, and the
+// error taxonomy every one of these bindings shares. The binding is a thin
+// layer on top of it.
+use irgx by binding
+
+// The kinship engine's binding, for the corpus scope and timeout the two verbs
+// share with `relate`. Composition needs both engines by definition, so this is
+// the dependency that makes this package the composed one.
+use relate by binding tests
+
+// The exact-search binding, held only by the tests as a second opinion — a
+// verdict this package reaches by composition, checked against the tool that
+// answers it directly.
+use gist by tests
+
+// Build- and test-time only, carried by the tier that runs under them.
+use hatchling by packaging
+use pytest by tests
+
+// Structural laws. Three tiers and no indirection, so a hop ceiling of one is
+// what the tree needs; lower it if a layer ever collapses, never raise it.
+limit  reach to 1 hop
+forbid cycles across directories

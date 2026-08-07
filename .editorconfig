@@ -30,10 +30,10 @@ indent_size              = 4
 indent_style = space
 indent_size  = 4
 
-# The ward contract language (contract/blast.ward) - a house DSL with no
+# The zoning contract language (charter.zone) - a small DSL with no
 # formatter, so this file IS its layout contract. It is also the shortest one
 # in the ecosystem: two hops of reach, and no more.
-[*.ward]
+[*.zone]
 indent_style = space
 indent_size  = 4
 

@@ -9,9 +9,10 @@
 # The face and the FFI producer - two verbs and the shims that export them.
 /src/                   @GriffinCanCode
 
-# The two contracts. `blast.ward` is the import topology - two hops of reach,
+# The two contracts. `charter.zone` is the import topology - two hops of reach,
 # and no more; `compose.toml` declares the seam, including the rule that exact
 # and statistical scores never fuse into one number.
+/charter.zone           @GriffinCanCode
 /contract/              @GriffinCanCode
 
 # The C ABI a host links against.
