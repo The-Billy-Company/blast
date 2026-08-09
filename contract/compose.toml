@@ -27,9 +27,9 @@
 # query verbs instead of duplicating their unit/channel/shape axes under second
 # names. `relate echoes --matching SessionStore --shape families` is what
 # `irregex family` was; `relate pack --matching …` is what `irregex context`
-# was. The kernels stay pure and I/O-free under src/kernel/compose/.
+# was. The kernels stay pure and I/O-free under relate's `src/kernel/compose/`.
 #
-# The `irregex` binary keeps the two composed workflows that are NOT a relate
+# The `blast` binary keeps the two composed workflows that are NOT a relate
 # question with a filter bolted on: `provenance` (quotation re-verified against
 # current bytes) and `blast` (a symbol's live radius, assembled from several
 # kernels). Throughout, the exact and statistical scores stay in separate fields

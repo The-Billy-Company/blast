@@ -2,20 +2,22 @@
 //!
 //! A hand-run `gist -l | relate …` pipe throws the match information away
 //! between the two steps and makes the statistical half pay whole-corpus noise.
-//! These four verbs keep it: an exact `PatternSet` narrows the corpus to a typed
+//! These verbs keep it: an exact `PatternSet` narrows the corpus to a typed
 //! candidate set, and the compression kernel then runs *only* inside that
 //! subset. The exact and statistical scores stay in separate row fields — never
 //! fused into one number that means neither.
 //!
 //! | verb | question |
 //! |---|---|
-//! | [`context`] | the reading set among files that actually match some intents |
-//! | [`family`] | which matching files are forks or renamed twins of each other |
 //! | [`provenance`] | where a pasted snippet is really from, re-verified against live bytes |
 //! | [`blast`] | what moves if I change this symbol |
 //!
-//! `context` and `family` require a scope — a root, or [`Composed::everywhere`]
-//! — because a composed query must never silently sweep a vendor tree.
+//! Two more op codes survive for hosts that stored the numbers — [`context`] (the
+//! reading set among files that actually match some intents) and [`family`] (which
+//! matching files are forks or renamed twins of each other) — but the CLI folded
+//! both onto `relate`'s `--matching` modifier, so they decline today. They require
+//! a scope — a root, or [`Composed::everywhere`] — because a composed query must
+//! never silently sweep a vendor tree.
 
 mod verbs;
 

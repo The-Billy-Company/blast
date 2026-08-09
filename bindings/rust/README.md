@@ -2,7 +2,9 @@
 
 The Rust face of the `blast` package: what breaks if I change this symbol, and
 where a pasted snippet came from. Exact narrows, compression reasons inside the
-candidate set. Four verbs: `context`, `family`, `provenance`, `blast`.
+candidate set. Two live verbs: `provenance` and `blast`. The ABI keeps `context`
+and `family` op codes for hosts that stored the numbers, but the CLI folded those
+questions onto `relate`'s `--matching` modifier and they decline today.
 
 ```bash
 cargo add blast-search
