@@ -138,8 +138,19 @@ pub fn build(b: *std.Build) void {
     // `zig build test` — the face's own unit tests plus the FFI dispatch.
     // Debug regardless of the CLI's ReleaseFast posture, since a release
     // build elides the safety checks a test is partly there to trip.
+    //
+    // The `irregex` import here needs its OWN dependency instance at
+    // `{ .optimize = .Debug, .@"lib-optimize" = .Debug }`, matching exactly
+    // what `relate`'s `engineOptions(target, .Debug)` requests for ITS
+    // irregex below — `irgx_dep` above is keyed on `lib_optimize` with no
+    // `lib-optimize` at all, a different option set. Per the comment on
+    // `engine_opts` further up: matching target/optimize is necessary and
+    // not sufficient, and one fewer option gets a second `irregex/src/root.zig`
+    // that collides with relate's the moment both land in this one test binary
+    // ("file exists in modules 'irregex' and 'irregex0'").
+    const test_irgx_dep = b.dependency("irregex", .{ .target = target, .optimize = .Debug, .@"lib-optimize" = .Debug });
     const test_deps = [_]std.Build.Module.Import{
-        .{ .name = "irregex", .module = irgx_dep.module("irregex") },
+        .{ .name = "irregex", .module = test_irgx_dep.module("irregex") },
         .{ .name = "relate", .module = b.dependency("relate", .{ .target = target, .optimize = .Debug }).module("relate") },
     };
     const test_face = b.createModule(.{
