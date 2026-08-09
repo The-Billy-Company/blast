@@ -36,9 +36,16 @@ pub fn build(b: *std.Build) void {
     // Same target/optimize on every sibling, so the build system dedupes the
     // path deps into one instance each — relate's own irregex/gist imports and
     // the ones below must be the SAME modules or their types won't unify.
+    //
+    // Dedup keys on the WHOLE option set, not on target/optimize, so matching
+    // those two is necessary and not sufficient: gist asks the engine for
+    // `lib-optimize` as well, and a sibling passing one fewer option gets a
+    // second `irregex/src/root.zig` that collides with gist's the moment both
+    // reach one binary ("file exists in modules 'irregex' and 'irregex0'").
     const opts = .{ .target = target, .optimize = optimize };
+    const engine_opts = .{ .target = target, .optimize = optimize, .@"lib-optimize" = optimize };
     const deps = [_]std.Build.Module.Import{
-        .{ .name = "irregex", .module = b.dependency("irregex", opts).module("irregex") },
+        .{ .name = "irregex", .module = b.dependency("irregex", engine_opts).module("irregex") },
         .{ .name = "relate", .module = b.dependency("relate", opts).module("relate") },
     };
 
