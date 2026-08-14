@@ -1,6 +1,6 @@
 .{
     .name = .blast,
-    .version = "1.1.0", // x-release-please-version
+    .version = "1.1.1", // x-release-please-version
     .fingerprint = 0x4e4fa58c86d8e88e,
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
