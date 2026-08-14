@@ -1,0 +1,10 @@
+# The spelling gate discovers this file on its own. It exists to name the words in
+# this tree that are correct and only look wrong, so a real misspelling still fails
+# the build. Every entry below is a word the gate cannot judge from the token alone.
+
+[default.extend-words]
+# `b"caf\xe9.txt"` in bench/apparatus/test_provenance.py is latin-1 "café" - a
+# deliberately non-UTF-8 fixture path, because a provenance walk has to survive
+# filenames that are not valid UTF-8. The gate sees the truncated `caf` and reads
+# it as `calf`. Correcting it would destroy the only fixture that tests the case.
+caf = "caf"
