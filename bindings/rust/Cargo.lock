@@ -10,7 +10,7 @@ checksum = "b588b76d00fde79687d7646a9b5bdf3cc0f655e0bbd080335a95d7e96f3587da"
 
 [[package]]
 name = "blast-search"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "irgx",
  "tempfile",
@@ -51,7 +51,7 @@ dependencies = [
 
 [[package]]
 name = "irgx"
-version = "2.0.0"
+version = "2.2.1"
 dependencies = [
  "serde",
  "serde_json",
