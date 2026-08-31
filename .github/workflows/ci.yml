@@ -171,7 +171,7 @@ jobs:
           for package in irregex gist relate blast; do
             ( cd "$package" && zig build --summary none )
           done
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - name: pytest on 3.12 (the declared floor)
         working-directory: blast/bindings/python
         run: uv run --python 3.12 pytest -q
@@ -286,7 +286,7 @@ jobs:
       # layout that differs in every one of these repositories. This is a
       # plain step, so it inherits the working directory and the toolchain
       # rustup already resolved above.
-      - uses: taiki-e/install-action@7f4eb899022d8fe70b20c4f3de697aa85c309026 # v2.85.11
+      - uses: taiki-e/install-action@b6ff580856c41316412a0b9b60540fbc6f8c82cc # v2.86.7
         with:
           tool: cargo-deny@0.19.0
       # deny.toml has been checked in the whole time with nothing running it.
@@ -383,7 +383,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - run: uv run --no-project --with yamllint==1.38.0 yamllint .
       - run: uv run --no-project --with taplo==0.9.3 taplo lint
       - run: uv run --no-project --with taplo==0.9.3 taplo fmt --check
@@ -397,7 +397,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - run: uv run --no-project --with ruff==0.16.1 ruff check --config quality/ruff.toml .
       - run: uv run --no-project --with ruff==0.16.1 ruff format --check --config quality/ruff.toml .
 
@@ -410,7 +410,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - run: uv run --no-project --with zizmor==1.29.0 zizmor --no-online-audits --strict-collection .
 
   topology:
@@ -431,7 +431,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       # The fix is in the code, or in a `variance ... because "..."` that says
       # what would retire it - never in quietly widening the contract to match
       # what the imports happen to do today.
@@ -456,7 +456,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - run: uv run --no-project --python 3.12 python tools/version_parity.py
 
       # Every index this project publishes to shows the repository README as the
