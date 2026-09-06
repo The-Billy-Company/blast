@@ -69,67 +69,7 @@ jobs:
           command: ci-status
           args: ${{ github.repository }} ${{ github.sha }}
 
-      - name: Read the declared irregex + relate-search floors
-        if: startsWith(github.ref, 'refs/tags/v')
-        id: dep
-        run: |
-          set -euo pipefail
-          python3 -c "
-          import os, re
-          text = open('bindings/python/pyproject.toml').read()
-          irregex = re.search(r'\"irregex>=([0-9.]+)', text)[1]
-          relate = re.search(r'\"relate-search>=([0-9.]+)', text)[1]
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f'irregex_floor={irregex}\n')
-              f.write(f'relate_floor={relate}\n')
-          "
-      - if: startsWith(github.ref, 'refs/tags/v')
-        id: dep-pypi-irregex
-        uses: The-Billy-Company/.github/actions/package-release@18530e6f8b7ad634dcfe52e423e2a0a8e7bd521e # main
-        with:
-          command: registry-probe
-          args: pypi irregex ${{ steps.dep.outputs.irregex_floor }}
-      - if: startsWith(github.ref, 'refs/tags/v')
-        id: dep-crates-irregex
-        uses: The-Billy-Company/.github/actions/package-release@18530e6f8b7ad634dcfe52e423e2a0a8e7bd521e # main
-        with:
-          command: registry-probe
-          args: crates irgx ${{ steps.dep.outputs.irregex_floor }}
-      - if: startsWith(github.ref, 'refs/tags/v')
-        id: dep-pypi-relate
-        uses: The-Billy-Company/.github/actions/package-release@18530e6f8b7ad634dcfe52e423e2a0a8e7bd521e # main
-        with:
-          command: registry-probe
-          args: pypi relate-search ${{ steps.dep.outputs.relate_floor }}
-      - name: irregex + relate-search declared floors must already be published
-        if: startsWith(github.ref, 'refs/tags/v')
-        env:
-          IRREGEX_PYPI: ${{ steps.dep-pypi-irregex.outputs.result }}
-          IRREGEX_CRATES: ${{ steps.dep-crates-irregex.outputs.result }}
-          RELATE_PYPI: ${{ steps.dep-pypi-relate.outputs.result }}
-          IRREGEX_FLOOR: ${{ steps.dep.outputs.irregex_floor }}
-          RELATE_FLOOR: ${{ steps.dep.outputs.relate_floor }}
-        run: |
-          set -euo pipefail
-          fail=0
-          if [ "$IRREGEX_PYPI" != present ] || [ "$IRREGEX_CRATES" != present ]; then
-            echo "::error::irregex $IRREGEX_FLOOR is not yet published" \
-                 "(pypi: $IRREGEX_PYPI, crates: $IRREGEX_CRATES)." >&2
-            fail=1
-          fi
-          if [ "$RELATE_PYPI" != present ]; then
-            echo "::error::relate-search $RELATE_FLOOR is not yet on PyPI (state: $RELATE_PYPI)." >&2
-            fail=1
-          fi
-          if [ "$fail" -eq 1 ]; then
-            echo "::error::the search family releases in order — irregex, then relate, then" \
-                 "blast last. Publish the missing dependency first." >&2
-            exit 1
-          fi
-          echo "irregex $IRREGEX_FLOOR and relate-search $RELATE_FLOOR are published"
 
-  # The shared Gist matrix builds the same native artifact for wheels and archives.
-  # Wheels only: an incomplete sdist cannot build the sibling Zig source graph.
   build:
     needs: preflight
     runs-on: macos-latest
@@ -257,10 +197,75 @@ jobs:
       # The OIDC token Trusted Publishing exchanges for an upload credential.
       id-token: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: dist
           path: dist
+      - name: Read the declared irregex + relate-search floors
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: dep
+        run: |
+          set -euo pipefail
+          python3 -c "
+          import os, re
+          text = open('bindings/python/pyproject.toml').read()
+          irregex = re.search(r'\"irregex>=([0-9.]+)', text)[1]
+          relate = re.search(r'\"relate-search>=([0-9.]+)', text)[1]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'irregex_floor={irregex}\n')
+              f.write(f'relate_floor={relate}\n')
+          "
+      - if: startsWith(github.ref, 'refs/tags/v')
+        id: dep-pypi-irregex
+        uses: The-Billy-Company/.github/actions/package-release@18530e6f8b7ad634dcfe52e423e2a0a8e7bd521e # main
+        with:
+          command: registry-probe
+          args: pypi irregex ${{ steps.dep.outputs.irregex_floor }}
+      - if: startsWith(github.ref, 'refs/tags/v')
+        id: dep-crates-irregex
+        uses: The-Billy-Company/.github/actions/package-release@18530e6f8b7ad634dcfe52e423e2a0a8e7bd521e # main
+        with:
+          command: registry-probe
+          args: crates irgx ${{ steps.dep.outputs.irregex_floor }}
+      - if: startsWith(github.ref, 'refs/tags/v')
+        id: dep-pypi-relate
+        uses: The-Billy-Company/.github/actions/package-release@18530e6f8b7ad634dcfe52e423e2a0a8e7bd521e # main
+        with:
+          command: registry-probe
+          args: pypi relate-search ${{ steps.dep.outputs.relate_floor }}
+      - name: irregex + relate-search declared floors must already be published
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          IRREGEX_PYPI: ${{ steps.dep-pypi-irregex.outputs.result }}
+          IRREGEX_CRATES: ${{ steps.dep-crates-irregex.outputs.result }}
+          RELATE_PYPI: ${{ steps.dep-pypi-relate.outputs.result }}
+          IRREGEX_FLOOR: ${{ steps.dep.outputs.irregex_floor }}
+          RELATE_FLOOR: ${{ steps.dep.outputs.relate_floor }}
+        run: |
+          set -euo pipefail
+          fail=0
+          if [ "$IRREGEX_PYPI" != present ] || [ "$IRREGEX_CRATES" != present ]; then
+            echo "::error::irregex $IRREGEX_FLOOR is not yet published" \
+                 "(pypi: $IRREGEX_PYPI, crates: $IRREGEX_CRATES)." >&2
+            fail=1
+          fi
+          if [ "$RELATE_PYPI" != present ]; then
+            echo "::error::relate-search $RELATE_FLOOR is not yet on PyPI (state: $RELATE_PYPI)." >&2
+            fail=1
+          fi
+          if [ "$fail" -eq 1 ]; then
+            echo "::error::the search family releases in order — irregex, then relate, then" \
+                 "blast last. Publish the missing dependency first." >&2
+            exit 1
+          fi
+          echo "irregex $IRREGEX_FLOOR and relate-search $RELATE_FLOOR are published"
+
+  # The shared Gist matrix builds the same native artifact for wheels and archives.
+  # Wheels only: an incomplete sdist cannot build the sibling Zig source graph.
+
       - id: tag
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
       # Probed before the OIDC token is minted, the same idempotency the
