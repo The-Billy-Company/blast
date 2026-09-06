@@ -22,4 +22,4 @@ default_branch = "main"
 
 [registries]
 pypi = "blast-search"
-crates = "blast"
+crates = "blast-search"
