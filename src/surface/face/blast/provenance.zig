@@ -43,11 +43,20 @@ pub fn runProvenance(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u
     var min_phrase: usize = default_min_phrase;
     var context_lines: usize = 2;
     var json = false;
+    var operands = false;
 
     var i: usize = 0;
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
-        if (std.mem.eql(u8, arg, "--min-phrase")) {
+        if (operands) {
+            if (text == null) {
+                text = arg;
+            } else die(usage_msg, .{});
+            continue;
+        }
+        if (std.mem.eql(u8, arg, "--")) {
+            operands = true;
+        } else if (std.mem.eql(u8, arg, "--min-phrase")) {
             min_phrase = flags.count(argv, &i, "--min-phrase");
         } else if (std.mem.eql(u8, arg, "-C") or std.mem.eql(u8, arg, "--context")) {
             context_lines = flags.count(argv, &i, "-C");

@@ -77,6 +77,7 @@ pub fn build(b: *std.Build) void {
     face.addOptions("build_options", version);
     const exe = b.addExecutable(.{ .name = "blast", .root_module = face });
     b.installArtifact(exe);
+    exe.root_module.strip = b.option(bool, "strip", "Omit debug info from the installed CLI (packaging)");
 
     // ── the C-ABI dual artifact ──
     // Rooted at the export shims so no dependent of a blast module would

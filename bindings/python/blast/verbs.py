@@ -81,7 +81,7 @@ def provenance(
     `introspection.atlas_index(shelf=True)` builds.
     """
     schema = verb_schema("provenance")
-    argv = [text, "--min-phrase", str(min_phrase)]
+    argv = ["--min-phrase", str(min_phrase), "--", text]
 
     def spawn() -> analytic.Rows:
         return cold.answer("blast", "provenance", argv, schema=schema, cwd=cwd, timeout=timeout)

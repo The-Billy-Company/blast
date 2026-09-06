@@ -16,9 +16,9 @@ The distribution is `blast-search`; the import stays `blast`. The bare name on
 PyPI belongs to an unrelated author, so this is the same split bs4, PIL, and
 cv2 already ship.
 
-This package is the bindings, not the engine: every verb answers by running the
-`blast` binary, so that has to be on `PATH` (or `$BLAST_BIN`). Without it the
-first call raises `GistNotFoundError` rather than failing quietly.
+We bundle the native `blast` executable in the wheel and install it on `PATH`.
+The bindings resolve that bundled binary directly; `$BLAST_BIN` can select
+a custom build.
 
 ## Blast radius
 
@@ -73,10 +73,8 @@ phrase, so `verified=False` is drift being reported rather than hidden.
 
 ## What it needs
 
-The `blast` binary on `PATH` (or `$BLAST_BIN`), which
-[the repository](https://github.com/The-Billy-Company/blast) builds with
-`zig build`. `provenance` reads relate's codex shelf, built by
-`relate.atlas_index(shelf=True)`.
+Python 3.12 or later; the wheel supplies the engine. `provenance` reads
+relate's codex shelf, built by `relate.atlas_index(shelf=True)`.
 
 ## Why compose instead of piping two tools
 

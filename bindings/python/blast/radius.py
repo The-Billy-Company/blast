@@ -178,7 +178,7 @@ def blast(
     comments first) and records the loss in `stats.omitted` — leave it unset for
     a complete answer, which is what a program usually wants.
     """
-    argv = [symbol, *(["--budget", str(budget)] if budget is not None else [])]
+    argv = [*(["--budget", str(budget)] if budget is not None else []), "--", symbol]
     rows, _ = run("blast", "blast", argv, roots, cwd=cwd, timeout=timeout)
     return _decode(rows[0] if rows else {})
 

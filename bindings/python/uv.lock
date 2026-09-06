@@ -4,7 +4,7 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "blast-search"
-version = "0.1.0"
+version = "1.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "irregex" },
@@ -44,7 +44,7 @@ wheels = [
 
 [[package]]
 name = "gist-search"
-version = "1.0.0"
+version = "1.2.5"
 source = { editable = "../../../gist/bindings/python" }
 dependencies = [
     { name = "irregex" },
@@ -87,7 +87,7 @@ wheels = [
 
 [[package]]
 name = "irregex"
-version = "1.0.0"
+version = "2.4.1"
 source = { editable = "../../../irregex/bindings/python" }
 
 [package.metadata]
@@ -153,7 +153,7 @@ wheels = [
 
 [[package]]
 name = "relate-search"
-version = "0.1.0"
+version = "1.2.0"
 source = { editable = "../../../relate/bindings/python" }
 dependencies = [
     { name = "irregex" },

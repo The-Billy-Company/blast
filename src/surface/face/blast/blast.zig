@@ -50,7 +50,14 @@ pub fn runBlast(gpa: std.mem.Allocator, io: std.Io, argv: []const []const u8) !v
     var i: usize = 0;
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
-        if (std.mem.eql(u8, arg, "--json")) {
+        if (std.mem.eql(u8, arg, "--")) {
+            for (argv[i + 1 ..]) |operand| {
+                if (symbol == null) {
+                    symbol = operand;
+                } else try roots.append(gpa, operand);
+            }
+            break;
+        } else if (std.mem.eql(u8, arg, "--json")) {
             json = true;
         } else if (std.mem.eql(u8, arg, "--budget")) {
             budget = flags.count(argv, &i, "--budget");

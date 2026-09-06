@@ -77,6 +77,12 @@ as a public issue.
 
 ## Install
 
+Install the Python package to get the bindings and the native CLI together:
+
+```bash
+pip install blast-search
+```
+
 Build from source with a Zig toolchain, or take the CLI from a release.
 
 ```bash
@@ -94,8 +100,8 @@ The binary is standalone for the `blast` verb. `provenance` additionally reads
 the codex shelf that relate writes, so install
 [relate](https://github.com/The-Billy-Company/relate) if you want attribution.
 
-The language bindings are published, and each drives that same binary rather
-than reimplementing it, so the CLI is a prerequisite for all three:
+The language bindings drive the same binary. The Python wheel bundles it;
+Rust and Go callers supply a CLI build:
 
 | | Install | You write |
 |---|---|---|

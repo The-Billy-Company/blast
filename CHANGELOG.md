@@ -7,6 +7,12 @@ binary) are documented here. Format follows
 
 <!-- towncrier release notes start -->
 
+## [1.2.0] - 2026-09-05
+
+### Added
+
+- We now ship the blast executable in platform wheels and matching release archives. The package shares irregex 2.4 with Gist and Relate, and a symbol or root after `--` remains a literal operand.
+
 ## [1.1.2] - 2026-08-29
 
 ### Fixed
