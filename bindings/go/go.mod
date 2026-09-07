@@ -19,5 +19,5 @@ toolchain go1.26.5
 // that is allowed to override a published version.
 require (
 	github.com/The-Billy-Company/irregex/bindings/go v1.0.0
-	github.com/The-Billy-Company/relate/bindings/go v1.0.0
+	github.com/The-Billy-Company/relate/bindings/go v1.1.2
 )
