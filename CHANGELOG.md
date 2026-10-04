@@ -7,6 +7,12 @@ binary) are documented here. Format follows
 
 <!-- towncrier release notes start -->
 
+## [1.2.2] - 2026-10-04
+
+### Fixed
+
+- We check `blast-search` on crates.io before publishing, so retries recognize the distribution that was already uploaded instead of checking the unrelated bare crate name.
+
 ## [1.2.1] - 2026-09-05
 
 ### Fixed
