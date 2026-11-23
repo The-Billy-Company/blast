@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! Blast's C-ABI dispatch — one entry, one cursor.
 //!
 //! This module materializes a BLAST answer — the composed verbs that need

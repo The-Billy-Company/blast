@@ -1,3 +1,5 @@
+// Copyright (c) 2026 The Billy Company
+
 // Package compose is the plane where both engines answer one question:
 // the exact pattern set narrows the corpus to a typed candidate set, and the
 // compression kernel then reasons only INSIDE that subset.

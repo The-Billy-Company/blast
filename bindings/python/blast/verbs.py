@@ -1,3 +1,4 @@
+# Copyright (c) 2026 The Billy Company
 """Narrow with exact match, then reason with compression.
 
 `gist` answers *"where is this exact pattern?"*; `relate` answers *"what is this

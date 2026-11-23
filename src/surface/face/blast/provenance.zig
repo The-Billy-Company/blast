@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! blast — the `provenance` verb: quotation attribution, gist-verified.
 //!
 //!   blast provenance TEXT [--min-phrase N] [-C N] [--json]

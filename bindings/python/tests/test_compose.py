@@ -1,3 +1,4 @@
+# Copyright (c) 2026 The Billy Company
 """Behavioral tests for composition — narrowing as a modifier, plus `blast` and `provenance`.
 
 The claim is that exact match and compression answer better together than

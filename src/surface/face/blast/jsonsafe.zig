@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! JSON-safe string emission for the byte slices blast does not control.
 //!
 //! `emit.jsonStr` is the ecosystem's one JSON string escaper, and by contract

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 The Billy Company
 """The shipped library must load from an install directory, and must not fork the engine's vocabulary.
 
 `linkLibrary` records the dependency's own build output directory as an rpath, and

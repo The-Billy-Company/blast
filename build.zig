@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! blast build graph — the composed-search face of the irregex ecosystem.
 //!
 //! One binary, `blast`: the two questions that need BOTH engines over the

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! blast — what the composed face can do, declared once.
 //!
 //! The single source for `blast --help`, `blast --schema`, verb dispatch,

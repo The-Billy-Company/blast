@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! Both engines at once: exact narrows, compression reasons inside.
 //!
 //! A hand-run `gist -l | relate …` pipe throws the match information away

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! One builder for all four composed verbs — they share `[analytic.params]`
 //! `compose`, because they ask the same two-part question with different halves
 //! emphasized.

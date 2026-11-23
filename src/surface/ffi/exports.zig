@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! `libblast` — the C-ABI artifact's root, and nothing else.
 //!
 //! This file exists to be a *different* root from the face module. A Zig

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 /* blast — the composed face's C ABI.
  *
  * The four composed verbs that need both engines over CURRENT bytes

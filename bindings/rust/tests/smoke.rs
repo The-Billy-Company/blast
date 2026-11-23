@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! Builder smoke — no binary required.
 //!
 //! Proves the composed request lowers into an argv the subprocess tier can

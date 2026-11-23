@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+# Copyright (c) 2026 The Billy Company
 <#
 .SYNOPSIS
 Build and install blast on Windows.

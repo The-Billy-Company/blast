@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 The Billy Company
 """Re-pin a Cargo.lock's own packages to the manifests beside them.
 
 A lockfile records a version for every package in the resolved graph, and some

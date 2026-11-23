@@ -1,3 +1,4 @@
+# Copyright (c) 2026 The Billy Company
 """The blast radius of a symbol — what moves if I change this?
 
 The question you ask *before* an edit, and the one no single engine answers.

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! blast — the composed-search CLI (the `blast` binary).
 //!
 //! The third product face over the one irregex kernel. Where `gist` answers

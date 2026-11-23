@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 .{
     .name = .blast,
     .version = "1.2.1", // x-release-please-version

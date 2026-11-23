@@ -1,3 +1,4 @@
+# Copyright (c) 2026 The Billy Company
 """blast — composed verbs over exact match and compression.
 
 Both engines on one question: `blast` (what moves if this symbol changes) and

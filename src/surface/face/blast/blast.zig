@@ -1,3 +1,4 @@
+// Copyright (c) 2026 The Billy Company
 //! blast — the `blast` verb: a live symbol blast radius for editing agents.
 //!
 //!   blast blast SYMBOL [--budget N] [--json] [ROOT...]
